@@ -4,6 +4,7 @@ import java.io.Serializable;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import lombok.Builder;
 import lombok.Data;
 
 //import io.swagger.annotations.ApiModel;
@@ -11,6 +12,7 @@ import lombok.Data;
 
 //@ApiModel(value = "PetBaseRest", description = "Complete data of a Rest Pet")
 @Data
+@Builder
 public class CurrencyWithRatioRest implements Serializable {
 
 	private static final long serialVersionUID = 1529769808872008113L;

@@ -6,13 +6,19 @@ import java.util.Collection;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 //import io.swagger.annotations.ApiModel;
 //import io.swagger.annotations.ApiModelProperty;
 
 //@ApiModel(value = "PetBaseRest", description = "Complete data of a Rest Pet")
 @Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class ExchangeCurrencyRest implements Serializable {
 
 	private static final long serialVersionUID = 1529769808872008113L;

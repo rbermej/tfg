@@ -5,13 +5,14 @@ import java.util.Collection;
 
 import uoc.tfg.raulberme.currencyexchange.entity.Currency;
 import uoc.tfg.raulberme.currencyexchange.entity.Ratio;
+import uoc.tfg.raulberme.currencyexchange.rest.ExchangeCurrencyRest;
 
 public interface CurrencyExchangeService {
 	public Collection<Currency> listAllCurrencies();
 
-	public Collection<Ratio> listRatiosByDay(LocalDate day);
+	public ExchangeCurrencyRest listRatiosByDay(LocalDate day);
 
-	public Collection<Ratio> listRatiosByDay(Long currencyBase, LocalDate day);
+	public ExchangeCurrencyRest listRatiosByDay(Long currencyBase, LocalDate day);
 
 	public Ratio retriveRatiosByCurrencyAndDay(Long currency, LocalDate day);
 

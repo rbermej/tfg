@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import uoc.tfg.raulberme.currencyexchange.entity.Currency;
-import uoc.tfg.raulberme.currencyexchange.entity.Ratio;
+import uoc.tfg.raulberme.currencyexchange.rest.ExchangeCurrencyRest;
 import uoc.tfg.raulberme.currencyexchange.service.CurrencyExchangeService;
 
 @RestController
@@ -32,13 +32,25 @@ public class CurrencyExchangeAPI {
 	}
 
 	@GetMapping("ratio/today")
-	public Collection<Ratio> retrieveExchangeValue() {
+	public ExchangeCurrencyRest retrieveExchangeValue() {
 		return service.listRatiosByDay(LocalDate.now());
 	}
 
 	@GetMapping("ratio/{day}")
-	public Collection<Ratio> retrieveExchangeValue(
+	public ExchangeCurrencyRest retrieveExchangeValue(
 			@PathVariable @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate day) {
 		return service.listRatiosByDay(day);
 	}
+
+	@GetMapping("ratio/today/base/{baseCurrencyId}")
+	public ExchangeCurrencyRest listRatiosByDay(@PathVariable Long baseCurrencyId) {
+		return service.listRatiosByDay(baseCurrencyId, LocalDate.now());
+	}
+
+	@GetMapping("ratio/{day}/base/{baseCurrencyId}")
+	public ExchangeCurrencyRest listRatiosByDay(@PathVariable Long baseCurrencyId,
+			@PathVariable @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate day) {
+		return service.listRatiosByDay(baseCurrencyId, day);
+	}
+
 }

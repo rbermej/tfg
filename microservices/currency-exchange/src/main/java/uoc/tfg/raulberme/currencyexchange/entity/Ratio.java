@@ -20,14 +20,14 @@ public class Ratio {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
-	@Column
+	@Column(nullable = false)
 	private Float ratioExchange;
 
-	@Column
+	@Column(nullable = false)
 	private LocalDate day;
 
 	@ManyToOne
-	@JoinColumn(name = "currency_id")
+	@JoinColumn(name = "currency_id", nullable = false)
 	private Currency currency;
 
 }
