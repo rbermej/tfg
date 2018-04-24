@@ -86,7 +86,7 @@ public class CurrencyExchangeServiceImpl implements CurrencyExchangeService {
 
 	@Override
 	public Ratio retriveRatiosByCurrencyAndDay(Long currency, LocalDate day) {
-		return ratioRepository.findByCurrencyAndDay(currency, day);
+		return ratioRepository.findByCurrencyAndDay(currencyRepository.getOne(currency), day);
 	}
 
 	@Override
@@ -94,9 +94,10 @@ public class CurrencyExchangeServiceImpl implements CurrencyExchangeService {
 		if (baseCurrencyId == destinationCurrencyId)
 			return quantity;
 		final Float ratioExchangeBase = baseCurrencyId.equals(systemBaseCurrencyId) ? SYSTEM_BASE_RATIO_EXCHANGE
-				: ratioRepository.findByCurrencyAndDay(baseCurrencyId, day).getRatioExchange();
-		final Float ratioExchangeDestination = baseCurrencyId.equals(systemBaseCurrencyId) ? SYSTEM_BASE_RATIO_EXCHANGE
-				: ratioRepository.findByCurrencyAndDay(baseCurrencyId, day).getRatioExchange();
+				: retriveRatiosByCurrencyAndDay(baseCurrencyId, day).getRatioExchange();
+		final Float ratioExchangeDestination = destinationCurrencyId.equals(systemBaseCurrencyId)
+				? SYSTEM_BASE_RATIO_EXCHANGE
+				: retriveRatiosByCurrencyAndDay(destinationCurrencyId, day).getRatioExchange();
 		return ratioExchangeDestination / ratioExchangeBase * quantity;
 	}
 
