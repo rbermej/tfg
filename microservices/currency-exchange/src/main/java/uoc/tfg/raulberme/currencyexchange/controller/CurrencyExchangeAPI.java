@@ -52,5 +52,17 @@ public class CurrencyExchangeAPI {
 			@PathVariable @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate day) {
 		return service.listRatiosByDay(baseCurrencyId, day);
 	}
+	
+	@GetMapping("ratio/today/from/{baseCurrencyId}/to/{destinationCurrencyId}/quantity/{quantity}")
+	public float calculateAmount(@PathVariable Long baseCurrencyId, @PathVariable Long destinationCurrencyId,
+			@PathVariable Float quantity) {
+		return service.calculateAmount(baseCurrencyId, destinationCurrencyId, quantity, LocalDate.now());
+	}
+
+	@GetMapping("ratio/{day}/from/{baseCurrencyId}/to/{destinationCurrencyId}/quantity/{quantity}")
+	public float calculateAmount(@PathVariable Long baseCurrencyId, @PathVariable Long destinationCurrencyId,
+			@PathVariable Float quantity, @PathVariable @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate day) {
+		return service.calculateAmount(baseCurrencyId, destinationCurrencyId, quantity, day);
+	}
 
 }

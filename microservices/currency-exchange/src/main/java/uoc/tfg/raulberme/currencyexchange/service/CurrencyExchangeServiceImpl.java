@@ -19,15 +19,16 @@ import uoc.tfg.raulberme.currencyexchange.rest.ExchangeCurrencyRest;
 @Service
 public class CurrencyExchangeServiceImpl implements CurrencyExchangeService {
 
-	private final Long baseCurrencyId;
+	private static final Float SYSTEM_BASE_RATIO_EXCHANGE = Float.valueOf("1");
+	private final Long systemBaseCurrencyId;
 	private final CurrencyRepository currencyRepository;
 	private final RatioRepository ratioRepository;
 
 	@Autowired
-	public CurrencyExchangeServiceImpl(@Value("${data.default.base_currency}") Long baseCurrencyId,
+	public CurrencyExchangeServiceImpl(@Value("${data.default.base_currency}") Long systemBaseCurrencyId,
 			CurrencyRepository currencyRepository, RatioRepository ratioRepository) {
 		super();
-		this.baseCurrencyId = baseCurrencyId;
+		this.systemBaseCurrencyId = systemBaseCurrencyId;
 		this.currencyRepository = currencyRepository;
 		this.ratioRepository = ratioRepository;
 	}
@@ -39,7 +40,7 @@ public class CurrencyExchangeServiceImpl implements CurrencyExchangeService {
 
 	@Override
 	public ExchangeCurrencyRest listRatiosByDay(LocalDate day) {
-		return listRatiosByDay(baseCurrencyId, day);
+		return listRatiosByDay(systemBaseCurrencyId, day);
 	}
 
 	@Override
@@ -59,7 +60,7 @@ public class CurrencyExchangeServiceImpl implements CurrencyExchangeService {
 							.ratio(r.getRatioExchange()).build())
 					.collect(Collectors.toList());
 
-			if (this.baseCurrencyId.equals(baseCurrencyId)) {
+			if (systemBaseCurrencyId.equals(baseCurrencyId)) {
 				baseCurrency = defaultCurrencyWithRatio();
 			} else {
 				destinationCurrency.add(defaultCurrencyWithRatio());
@@ -90,14 +91,19 @@ public class CurrencyExchangeServiceImpl implements CurrencyExchangeService {
 
 	@Override
 	public float calculateAmount(Long baseCurrencyId, Long destinationCurrencyId, Float quantity, LocalDate day) {
-		// TODO Auto-generated method stub
-		return 1;
+		if (baseCurrencyId == destinationCurrencyId)
+			return quantity;
+		final Float ratioExchangeBase = baseCurrencyId.equals(systemBaseCurrencyId) ? SYSTEM_BASE_RATIO_EXCHANGE
+				: ratioRepository.findByCurrencyAndDay(baseCurrencyId, day).getRatioExchange();
+		final Float ratioExchangeDestination = baseCurrencyId.equals(systemBaseCurrencyId) ? SYSTEM_BASE_RATIO_EXCHANGE
+				: ratioRepository.findByCurrencyAndDay(baseCurrencyId, day).getRatioExchange();
+		return ratioExchangeDestination / ratioExchangeBase * quantity;
 	}
 
 	private CurrencyWithRatioRest defaultCurrencyWithRatio() {
-		final Currency currency = currencyRepository.getOne(baseCurrencyId);
+		final Currency currency = currencyRepository.getOne(systemBaseCurrencyId);
 		return CurrencyWithRatioRest.builder().id(currency.getId()).name(currency.getName())
-				.acronym(currency.getAcronym()).ratio(Float.valueOf("1")).build();
+				.acronym(currency.getAcronym()).ratio(SYSTEM_BASE_RATIO_EXCHANGE).build();
 	}
 
 }
