@@ -1,33 +1,33 @@
-package uoc.tfg.raulberme.currencyexchange.rest;
+package uoc.tfg.raulberme.currencyexchange.dto;
 
 import java.io.Serializable;
+import java.time.LocalDate;
+import java.util.Collection;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
-
-//import io.swagger.annotations.ApiModel;
-//import io.swagger.annotations.ApiModelProperty;
+import lombok.NoArgsConstructor;
 
 //@ApiModel(value = "PetBaseRest", description = "Complete data of a Rest Pet")
 @Data
 @Builder
-public class RatioRest implements Serializable {
+@NoArgsConstructor
+@AllArgsConstructor
+public class ExchangeCurrencyDTO implements Serializable {
 
 	private static final long serialVersionUID = 1529769808872008113L;
 
 	// @ApiModelProperty(value = "The pet's id", required = false)
 	@JsonProperty
-	private Long id;
+	private RatioDTO baseCurrency;
 
 	@JsonProperty
-	private String name;
+	private LocalDate day;
 
 	@JsonProperty
-	private String isoCode;
-
-	@JsonProperty
-	private Float ratio;
+	private Collection<RatioDTO> destinationCurrency;
 
 }

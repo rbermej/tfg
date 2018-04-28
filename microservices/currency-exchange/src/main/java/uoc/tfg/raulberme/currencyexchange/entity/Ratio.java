@@ -29,5 +29,5 @@ public class Ratio {
 	@ManyToOne
 	@JoinColumn(name = "iso_code", nullable = false)
 	private Currency currency;
-	
+
 }

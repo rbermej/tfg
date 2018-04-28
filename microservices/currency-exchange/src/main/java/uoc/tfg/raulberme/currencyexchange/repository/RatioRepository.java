@@ -13,4 +13,6 @@ public interface RatioRepository extends JpaRepository<Ratio, Long> {
 
 	public Ratio findByCurrencyAndDay(Currency currency, LocalDate day);
 
+	public Collection<Ratio> findByCurrency(Currency currency);
+
 }
