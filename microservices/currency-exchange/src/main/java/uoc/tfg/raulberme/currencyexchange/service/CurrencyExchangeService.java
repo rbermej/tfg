@@ -12,9 +12,9 @@ public interface CurrencyExchangeService {
 
 	public ExchangeCurrencyRest listRatiosByDay(LocalDate day);
 
-	public ExchangeCurrencyRest listRatiosByDay(Long currencyBase, LocalDate day);
+	public ExchangeCurrencyRest listRatiosByDay(String currencyBase, LocalDate day);
 
-	public Ratio retriveRatiosByCurrencyAndDay(Long currency, LocalDate day);
+	public Ratio retriveRatiosByCurrencyAndDay(String currency, LocalDate day);
 
-	public float calculateAmount(Long currencyBase, Long currencyDestination, Float quantity, LocalDate day);
+	public float calculateAmount(String currencyBase, String currencyDestination, Float quantity, LocalDate day);
 }

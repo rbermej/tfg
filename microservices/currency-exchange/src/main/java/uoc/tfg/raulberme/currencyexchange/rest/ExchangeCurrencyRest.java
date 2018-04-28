@@ -25,12 +25,12 @@ public class ExchangeCurrencyRest implements Serializable {
 
 	// @ApiModelProperty(value = "The pet's id", required = false)
 	@JsonProperty
-	private CurrencyWithRatioRest baseCurrency;
+	private RatioRest baseCurrency;
 
 	@JsonProperty
 	private LocalDate day;
 
 	@JsonProperty
-	private Collection<CurrencyWithRatioRest> destinationCurrency;
+	private Collection<RatioRest> destinationCurrency;
 
 }

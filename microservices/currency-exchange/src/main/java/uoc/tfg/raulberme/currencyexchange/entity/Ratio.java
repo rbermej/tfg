@@ -23,11 +23,11 @@ public class Ratio {
 	@Column(nullable = false)
 	private Float ratioExchange;
 
-	@Column(nullable = false)
+	@Column
 	private LocalDate day;
 
 	@ManyToOne
-	@JoinColumn(name = "currency_id", nullable = false)
+	@JoinColumn(name = "iso_code", nullable = false)
 	private Currency currency;
-
+	
 }

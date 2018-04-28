@@ -43,24 +43,24 @@ public class CurrencyExchangeAPI {
 	}
 
 	@GetMapping("ratio/today/base/{baseCurrencyId}")
-	public ExchangeCurrencyRest listRatiosByDay(@PathVariable Long baseCurrencyId) {
+	public ExchangeCurrencyRest listRatiosByDay(@PathVariable String baseCurrencyId) {
 		return service.listRatiosByDay(baseCurrencyId, LocalDate.now());
 	}
 
 	@GetMapping("ratio/{day}/base/{baseCurrencyId}")
-	public ExchangeCurrencyRest listRatiosByDay(@PathVariable Long baseCurrencyId,
+	public ExchangeCurrencyRest listRatiosByDay(@PathVariable String baseCurrencyId,
 			@PathVariable @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate day) {
 		return service.listRatiosByDay(baseCurrencyId, day);
 	}
 	
 	@GetMapping("ratio/today/from/{baseCurrencyId}/to/{destinationCurrencyId}/quantity/{quantity}")
-	public float calculateAmount(@PathVariable Long baseCurrencyId, @PathVariable Long destinationCurrencyId,
+	public float calculateAmount(@PathVariable String baseCurrencyId, @PathVariable String destinationCurrencyId,
 			@PathVariable Float quantity) {
 		return service.calculateAmount(baseCurrencyId, destinationCurrencyId, quantity, LocalDate.now());
 	}
 
 	@GetMapping("ratio/{day}/from/{baseCurrencyId}/to/{destinationCurrencyId}/quantity/{quantity}")
-	public float calculateAmount(@PathVariable Long baseCurrencyId, @PathVariable Long destinationCurrencyId,
+	public float calculateAmount(@PathVariable String baseCurrencyId, @PathVariable String destinationCurrencyId,
 			@PathVariable Float quantity, @PathVariable @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate day) {
 		return service.calculateAmount(baseCurrencyId, destinationCurrencyId, quantity, day);
 	}

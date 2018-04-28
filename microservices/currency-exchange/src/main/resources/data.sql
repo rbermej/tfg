@@ -1,22 +1,23 @@
 --INSERT CURRENCIES--
-insert into currency (id, name, acronym, sign) values
-	(1, 'DOLLAR', 'USD', '$'),
-	(2, 'EURO',   'EUR', '€'),
-	(3, 'LLL',    'LLL', 'L'),
-	(4, 'YYY',    'YYY', 'Y');
+insert into currency (iso_code, name) values
+	('USD', 'Dólar estadounidenses'),
+	('EUR', 'Euros'),
+	('GBP', 'Libra esterlinas'),
+	('JPY', 'Yen');
 
 
 --INSERT RATIOS--
-insert into ratio (ratio_exchange, day, currency_id) values
-	(1.02,		'2018-03-18', 2),
-	(0.87,		'2018-03-18', 3),
-	(123,		'2018-03-18', 4),
-	(1.05,		'2018-03-19', 2),
-	(0.879,		'2018-03-19', 3),
-	(124.23,	'2018-03-19', 4),
-	(1.102,		'2018-03-20', 2),
-	(0.889,		'2018-03-20', 3),
-	(126.589,	'2018-03-20', 4),
-	(1.203,		'2018-03-21', 2),
-	(0.84,		'2018-03-21', 3),
-	(122.632,	'2018-03-21', 4);
+insert into ratio (iso_code, day, ratio_exchange) values
+	('USD', null, 1),
+	('EUR', '2018-03-18', 1.02),
+	('GBP', '2018-03-18', 0.87),	
+	('JPY', '2018-03-18', 123.0),		 
+	('EUR', '2018-03-19', 1.05),	
+	('GBP', '2018-03-19', 0.879),
+	('JPY', '2018-03-19', 124.23),
+	('EUR', '2018-03-20', 1.102),
+	('GBP', '2018-03-20', 0.889),
+	('JPY', '2018-03-20', 126.589),
+	('EUR', '2018-03-21', 1.203),
+	('GBP', '2018-03-21', 0.84),
+	('JPY', '2018-03-21', 122.632);

@@ -13,7 +13,7 @@ import lombok.Data;
 //@ApiModel(value = "PetBaseRest", description = "Complete data of a Rest Pet")
 @Data
 @Builder
-public class CurrencyWithRatioRest implements Serializable {
+public class RatioRest implements Serializable {
 
 	private static final long serialVersionUID = 1529769808872008113L;
 
@@ -25,7 +25,7 @@ public class CurrencyWithRatioRest implements Serializable {
 	private String name;
 
 	@JsonProperty
-	private String acronym;
+	private String isoCode;
 
 	@JsonProperty
 	private Float ratio;
