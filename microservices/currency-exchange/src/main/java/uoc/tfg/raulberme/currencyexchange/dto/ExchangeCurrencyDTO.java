@@ -6,6 +6,7 @@ import java.util.Collection;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -18,16 +19,18 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class ExchangeCurrencyDTO implements Serializable {
 
-	private static final long serialVersionUID = 1529769808872008113L;
+	private static final long serialVersionUID = 1L;
 
-	// @ApiModelProperty(value = "The pet's id", required = false)
+	@ApiModelProperty(value = "The base currency")
 	@JsonProperty
 	private RatioDTO baseCurrency;
 
+	@ApiModelProperty(value = "The ratio's day")
 	@JsonProperty
 	private LocalDate day;
 
+	@ApiModelProperty(value = "The destination currencies")
 	@JsonProperty
-	private Collection<RatioDTO> destinationCurrency;
+	private Collection<RatioDTO> destinationCurrencies;
 
 }

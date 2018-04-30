@@ -33,8 +33,9 @@ public class CurrencyExchangeServiceImpl implements CurrencyExchangeService {
 	private final RatioProvider ratioProvider;
 
 	@Autowired
-	public CurrencyExchangeServiceImpl(@Value("${data.default.base_currency_iso}") String systemBaseCurrencyId,
-			CurrencyRepository currencyRepository, RatioRepository ratioRepository, RatioProvider ratioProvider) {
+	public CurrencyExchangeServiceImpl(@Value("${data.default.base_currency_iso}") final String systemBaseCurrencyId,
+			final CurrencyRepository currencyRepository, final RatioRepository ratioRepository,
+			final RatioProvider ratioProvider) {
 		this.systemBaseCurrencyId = systemBaseCurrencyId;
 		this.currencyRepository = currencyRepository;
 		this.ratioRepository = ratioRepository;
@@ -47,12 +48,12 @@ public class CurrencyExchangeServiceImpl implements CurrencyExchangeService {
 	}
 
 	@Override
-	public ExchangeCurrencyDTO listRatiosByDay(LocalDate day) {
+	public ExchangeCurrencyDTO listRatiosByDay(final LocalDate day) {
 		return listRatiosByDay(systemBaseCurrencyId, day);
 	}
 
 	@Override
-	public ExchangeCurrencyDTO listRatiosByDay(String baseCurrencyId, LocalDate day) {
+	public ExchangeCurrencyDTO listRatiosByDay(final String baseCurrencyId, final LocalDate day) {
 
 		if (!ratioRepository.existsByDay(day))
 			findAndSaveExternalRatios(day);
@@ -82,12 +83,13 @@ public class CurrencyExchangeServiceImpl implements CurrencyExchangeService {
 				.collect(Collectors.toList());
 
 		return ExchangeCurrencyDTO.builder().baseCurrency(baseCurrency).day(day)
-				.destinationCurrency(orderedDestinationList).build();
+				.destinationCurrencies(orderedDestinationList).build();
 
 	}
 
 	@Override
-	public float calculateAmount(String baseCurrencyId, String destinationCurrencyId, Float quantity, LocalDate day) {
+	public float calculateAmount(final String baseCurrencyId, final String destinationCurrencyId, final Float quantity,
+			final LocalDate day) {
 		if (baseCurrencyId.equalsIgnoreCase(destinationCurrencyId))
 			return quantity;
 
@@ -103,7 +105,7 @@ public class CurrencyExchangeServiceImpl implements CurrencyExchangeService {
 		return quantity * ratioExchangeDestination / ratioExchangeBase;
 	}
 
-	private void findAndSaveExternalRatios(LocalDate day) {
+	private void findAndSaveExternalRatios(final LocalDate day) {
 		log.info(RATIO_NOT_FOUND_ACCESSING_EXTERNAL_PROVIDER);
 		Collection<Currency> currencies = currencyRepository.findAll();
 		final Map<String, Float> mapExternalRatios = ratioProvider.findByDay(day);
@@ -121,11 +123,11 @@ public class CurrencyExchangeServiceImpl implements CurrencyExchangeService {
 		return retriveRatioByCurrencyAndDay(systemBaseCurrencyId, null);
 	}
 
-	private Ratio retriveRatioByCurrencyAndDay(String currency, LocalDate day) {
+	private Ratio retriveRatioByCurrencyAndDay(final String currency, final LocalDate day) {
 		return ratioRepository.findByCurrencyAndDay(currencyRepository.getOne(currency), day);
 	}
 
-	private Ratio createRatio(Currency currency, Float value, LocalDate day) {
+	private Ratio createRatio(final Currency currency, final Float value, final LocalDate day) {
 		// @formatter:off
 		return Ratio.builder()
 				.currency(currency)
@@ -135,7 +137,7 @@ public class CurrencyExchangeServiceImpl implements CurrencyExchangeService {
 		// @formatter:on
 	}
 
-	private RatioDTO convertToDto(Ratio ratio) {
+	private RatioDTO convertToDto(final Ratio ratio) {
 		// @formatter:off
 		return RatioDTO.builder()
 				.id(ratio.getId())
@@ -145,7 +147,7 @@ public class CurrencyExchangeServiceImpl implements CurrencyExchangeService {
 		// @formatter:on
 	}
 
-	private CurrencyDTO convertToDto(Currency currency) {
+	private CurrencyDTO convertToDto(final Currency currency) {
 		// @formatter:off
 		return CurrencyDTO.builder()
 				.name(currency.getName())

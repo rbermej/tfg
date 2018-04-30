@@ -26,10 +26,10 @@ public class OpenExchangeRatesProvider implements RatioProvider {
 	private final String appID;
 
 	@Autowired
-	public OpenExchangeRatesProvider(RestTemplate restTemplate, ObjectMapper mapper,
-			@Value("${data.default.base_currency_iso}") String baseCurrencyISO,
-			@Value("${data.default.destination_currency_iso}") String listDestinationCurrencyISO,
-			@Value("${provider.open_exchange_rates.app_id}") String appID) {
+	public OpenExchangeRatesProvider(final RestTemplate restTemplate, final ObjectMapper mapper,
+			@Value("${data.default.base_currency_iso}") final String baseCurrencyISO,
+			@Value("${data.default.destination_currency_iso}") final String listDestinationCurrencyISO,
+			@Value("${provider.open_exchange_rates.app_id}") final String appID) {
 		this.restTemplate = restTemplate;
 		this.mapper = mapper;
 		this.baseCurrencyISO = baseCurrencyISO;
@@ -38,7 +38,7 @@ public class OpenExchangeRatesProvider implements RatioProvider {
 	}
 
 	@Override
-	public Map<String, Float> findByDay(LocalDate day) {
+	public Map<String, Float> findByDay(final LocalDate day) {
 		ResponseEntity<String> response = restTemplate.getForEntity(getPath(day), String.class);
 		try {
 			final String ratios = mapper.readTree(response.getBody()).path("rates").toString();
@@ -49,7 +49,7 @@ public class OpenExchangeRatesProvider implements RatioProvider {
 		}
 	}
 
-	private String getPath(LocalDate day) {
+	private String getPath(final LocalDate day) {
 		// @formatter:off
 		return new StringBuilder(RESOURCE_URL)
 				.append(day.toString()).append(".json")

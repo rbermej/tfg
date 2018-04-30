@@ -10,10 +10,11 @@ public interface CurrencyExchangeService {
 
 	public Collection<CurrencyDTO> listAllCurrencies();
 
-	public ExchangeCurrencyDTO listRatiosByDay(LocalDate day);
+	public ExchangeCurrencyDTO listRatiosByDay(final LocalDate day);
 
-	public ExchangeCurrencyDTO listRatiosByDay(String currencyBase, LocalDate day);
+	public ExchangeCurrencyDTO listRatiosByDay(final String currencyBase, final LocalDate day);
 
-	public float calculateAmount(String currencyBase, String currencyDestination, Float quantity, LocalDate day);
+	public float calculateAmount(final String currencyBase, final String currencyDestination, final Float quantity,
+			final LocalDate day);
 
 }

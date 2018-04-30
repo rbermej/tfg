@@ -6,7 +6,7 @@ insert into currency (iso_code, name) values
 	('JPY', 'Yen (Japan)');
 
 
---INSERT RATIOS--
+--INSERT RATIOS (from 2018-01-01 to 2018-04-30)--
 insert into ratio (iso_code, day, ratio_exchange) values
 	('USD', null, 1.0),
 	('EUR', '2018-01-01', 0.8325859904289246),
@@ -365,4 +365,7 @@ insert into ratio (iso_code, day, ratio_exchange) values
 	('JPY', '2018-04-28', 109.03936767578125),
 	('EUR', '2018-04-29', 0.8248569965362549),
 	('GBP', '2018-04-29', 0.7261139750480652),
-	('JPY', '2018-04-29', 109.05078125);		 
+	('JPY', '2018-04-29', 109.05078125),
+	('EUR', '2018-04-30', 0.8279569745063782),
+	('GBP', '2018-04-30', 0.7264220118522644),
+	('JPY', '2018-04-30', 109.34138488769531);
