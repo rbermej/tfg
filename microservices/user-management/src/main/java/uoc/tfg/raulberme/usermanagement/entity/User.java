@@ -13,7 +13,7 @@ import lombok.Data;
 @Entity
 @Data
 @Inheritance(strategy = InheritanceType.JOINED)
-public abstract class User {
+public class User {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -27,5 +27,12 @@ public abstract class User {
 
 	@Column
 	private String password;
+
+	@Column
+	private RolUserType rol;
+
+	public boolean canSignin() {
+		return true;
+	}
 
 }

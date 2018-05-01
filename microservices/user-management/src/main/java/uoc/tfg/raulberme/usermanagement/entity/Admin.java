@@ -14,4 +14,9 @@ public class Admin extends User {
 	@Column
 	private boolean deleted;
 
+	@Override
+	public boolean canSignin() {
+		return !deleted;
+	}
+
 }

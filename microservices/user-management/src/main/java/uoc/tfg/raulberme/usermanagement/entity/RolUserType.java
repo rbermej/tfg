@@ -1,11 +1,11 @@
 package uoc.tfg.raulberme.usermanagement.entity;
 
-public enum UserStatusType {
-	ACTIVATED((byte) 0), BLOQUED((byte) 1), DEACTIVATED((byte) 2);
+public enum RolUserType {
+	SUPERADMIN((byte) 0), ADMIN((byte) 1), REGISTERED_USER((byte) 2);
 
 	private byte id;
 
-	UserStatusType(byte id) {
+	RolUserType(byte id) {
 		this.id = id;
 	}
 
