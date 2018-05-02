@@ -1,16 +1,17 @@
 package uoc.tfg.raulberme.usermanagement.service;
 
-import uoc.tfg.raulberme.usermanagement.dto.AdminDTO;
-import uoc.tfg.raulberme.usermanagement.dto.RegisteredUserDTO;
-import uoc.tfg.raulberme.usermanagement.entity.Admin;
-import uoc.tfg.raulberme.usermanagement.entity.RegisteredUser;
+import java.util.Collection;
+
+import uoc.tfg.raulberme.usermanagement.entity.RolUserType;
 import uoc.tfg.raulberme.usermanagement.exception.UserManagementException;
+import uoc.tfg.raulberme.usermanagement.form.AdminLoginForm;
+import uoc.tfg.raulberme.usermanagement.form.UserLoginForm;
 
 public interface UserManagementService {
 
-	public RegisteredUserDTO login(final RegisteredUser user);
+	public void login(final UserLoginForm user);
 
-	public AdminDTO login(final Admin admin);
+	public void login(final AdminLoginForm admin);
 
 	public Long signin(final String username, final String password) throws UserManagementException;
 
@@ -25,5 +26,7 @@ public interface UserManagementService {
 	public void deletedAdmin(final Long id);
 
 	public void lockUser(final Long id);
+
+	boolean hasAuthorization(final String token, final Collection<RolUserType> roles);
 
 }

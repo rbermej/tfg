@@ -1,5 +1,7 @@
 package uoc.tfg.raulberme.usermanagement.controller;
 
+import javax.validation.Valid;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -8,16 +10,14 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
-import uoc.tfg.raulberme.usermanagement.dto.AdminDTO;
-import uoc.tfg.raulberme.usermanagement.dto.RegisteredUserDTO;
-import uoc.tfg.raulberme.usermanagement.entity.Admin;
 import uoc.tfg.raulberme.usermanagement.entity.RegisteredUser;
 import uoc.tfg.raulberme.usermanagement.exception.UserManagementException;
+import uoc.tfg.raulberme.usermanagement.form.AdminLoginForm;
+import uoc.tfg.raulberme.usermanagement.form.UserLoginForm;
 import uoc.tfg.raulberme.usermanagement.service.UserManagementService;
 
 @RestController
@@ -34,16 +34,14 @@ public class UserManagementAPI {
 
 	@ApiOperation(value = "Login user", notes = "Login user")
 	@PutMapping("/user")
-	@ResponseBody
-	public RegisteredUserDTO login(@RequestBody final RegisteredUser user) {
-		return service.login(user);
+	public void login(@Valid @RequestBody final UserLoginForm user) {
+		service.login(user);
 	}
 
 	@ApiOperation(value = "Login admin", notes = "Login admin")
 	@PutMapping("/admin")
-	@ResponseBody
-	public AdminDTO login(@RequestBody final Admin admin) {
-		return service.login(admin);
+	public void login(@Valid @RequestBody final AdminLoginForm admin) {
+		service.login(admin);
 	}
 
 	@ApiOperation(value = "Signin user", notes = "Signin user (registered user, admin or superadmin)")

@@ -1,15 +1,20 @@
 package uoc.tfg.raulberme.usermanagement.service.impl;
 
+import java.util.Collection;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import uoc.tfg.raulberme.usermanagement.dto.AdminDTO;
-import uoc.tfg.raulberme.usermanagement.dto.RegisteredUserDTO;
 import uoc.tfg.raulberme.usermanagement.entity.Admin;
 import uoc.tfg.raulberme.usermanagement.entity.RegisteredUser;
+import uoc.tfg.raulberme.usermanagement.entity.RolUserType;
 import uoc.tfg.raulberme.usermanagement.entity.User;
 import uoc.tfg.raulberme.usermanagement.entity.UserStatusType;
+import uoc.tfg.raulberme.usermanagement.exception.EntityNotFoundUserManagementException;
+import uoc.tfg.raulberme.usermanagement.exception.UnauthorizedUserManagementException;
 import uoc.tfg.raulberme.usermanagement.exception.UserManagementException;
+import uoc.tfg.raulberme.usermanagement.form.AdminLoginForm;
+import uoc.tfg.raulberme.usermanagement.form.UserLoginForm;
 import uoc.tfg.raulberme.usermanagement.repository.AdminRepository;
 import uoc.tfg.raulberme.usermanagement.repository.RegisteredUserRepository;
 import uoc.tfg.raulberme.usermanagement.repository.UserRepository;
@@ -31,25 +36,25 @@ public class UserManagementServiceImpl implements UserManagementService {
 	}
 
 	@Override
-	public RegisteredUserDTO login(final RegisteredUser user) {
+	public void login(final UserLoginForm user) {
 		// TODO Auto-generated method stub
-		return null;
 	}
 
 	@Override
-	public AdminDTO login(final Admin admin) {
+	public void login(final AdminLoginForm admin) {
 		// TODO Auto-generated method stub
-		return null;
 	}
 
 	@Override
 	public Long signin(final String username, final String password) throws UserManagementException {
+		// TODO return token (string)
+		// do (create token) while token exist on BBDD
 		final User user = retrieveUser(username);
 		if (user == null) {
-			throw new UserManagementException("ERROR: username '" + username + "' not found.");
+			throw new EntityNotFoundUserManagementException("ERROR: user with username '" + username + "' not found.");
 		}
 		if (!user.canSignin()) {
-			throw new UserManagementException("ERROR: user can't be signed in.");
+			throw new UnauthorizedUserManagementException("ERROR: user can't be signed in.");
 		}
 		if (!user.getPassword().equals(password)) {
 			if (user instanceof RegisteredUser) {
@@ -59,12 +64,14 @@ public class UserManagementServiceImpl implements UserManagementService {
 				if (tries == 0) {
 					registeredUser.setStatus(UserStatusType.BLOQUED);
 					registeredUserRepository.save(registeredUser);
-					throw new UserManagementException("ERROR: incorrect password. Your user has been bloqued.");
+					throw new UnauthorizedUserManagementException(
+							"ERROR: incorrect password. Your user has been bloqued.");
 				}
 				registeredUserRepository.save(registeredUser);
-				throw new UserManagementException("ERROR: incorrect password. Number of available attempts: " + tries);
+				throw new UnauthorizedUserManagementException(
+						"ERROR: incorrect password. Number of available attempts: " + tries);
 			}
-			throw new UserManagementException("ERROR: incorrect password.");
+			throw new UnauthorizedUserManagementException("ERROR: incorrect password.");
 		}
 		if (user instanceof RegisteredUser) {
 			((RegisteredUser) user).initiateTries();
@@ -72,27 +79,10 @@ public class UserManagementServiceImpl implements UserManagementService {
 		return user.getId();
 	}
 
-	private User retrieveUser(final String username) {
-		final User user = userRepository.findByUsername(username);
-		if (user == null) {
-			return null;
-		}
-		switch (user.getRol()) {
-		case SUPERADMIN:
-			return user;
-		case ADMIN:
-			return adminRepository.getOne(user.getId());
-		case REGISTERED_USER:
-			return registeredUserRepository.getOne(user.getId());
-		default:
-			return null;
-		}
-
-	}
-
 	@Override
 	public void signout(final Long id) {
 		// TODO Auto-generated method stub
+		// delete token
 
 	}
 
@@ -133,6 +123,39 @@ public class UserManagementServiceImpl implements UserManagementService {
 		final RegisteredUser user = registeredUserRepository.getOne(id);
 		user.setStatus(UserStatusType.BLOQUED);
 		registeredUserRepository.save(user);
+	}
+
+	@Override
+	public boolean hasAuthorization(final String token, final Collection<RolUserType> roles) {
+		// TODO
+		// 1 get token + user
+		// 2 compare rol of user with list of roles
+		return false;
+	}
+
+	private User retrieveUser(final String username) {
+		final User user = userRepository.findByUsername(username);
+		if (user == null) {
+			return null;
+		}
+		switch (user.getRol()) {
+		case SUPERADMIN:
+			return user;
+		case ADMIN:
+			return adminRepository.getOne(user.getId());
+		case REGISTERED_USER:
+			return registeredUserRepository.getOne(user.getId());
+		default:
+			return null;
+		}
+
+	}
+
+	private RegisteredUser convertToEntity(final UserLoginForm ratio) {
+		// @formatter:off
+		//TODO create builder with all params
+		return RegisteredUser.builder().build();
+		// @formatter:on
 	}
 
 }
