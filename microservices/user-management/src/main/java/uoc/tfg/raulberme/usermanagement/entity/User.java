@@ -23,17 +23,24 @@ public class User {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
-	@Column(unique = true)
+	@Column(unique = true, nullable = false)
 	private String username;
 
-	@Column(unique = true)
+	@Column(unique = true, nullable = false)
 	private String email;
 
-	@Column
+	@Column(nullable = false)
 	private String password;
 
-	@Column
+	@Column(nullable = false)
 	private RolUserType rol;
+
+	public User(final String username, final String email, final String password, final RolUserType rol) {
+		this.username = username;
+		this.email = email;
+		this.password = password;
+		this.rol = rol;
+	}
 
 	public boolean canSignin() {
 		return true;

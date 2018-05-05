@@ -1,13 +1,15 @@
 package uoc.tfg.raulberme.usermanagement.service.impl;
 
-import java.util.Collection;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import net.bytebuddy.utility.RandomString;
 import uoc.tfg.raulberme.usermanagement.entity.Admin;
 import uoc.tfg.raulberme.usermanagement.entity.RegisteredUser;
 import uoc.tfg.raulberme.usermanagement.entity.RolUserType;
+import uoc.tfg.raulberme.usermanagement.entity.Token;
 import uoc.tfg.raulberme.usermanagement.entity.User;
 import uoc.tfg.raulberme.usermanagement.entity.UserStatusType;
 import uoc.tfg.raulberme.usermanagement.exception.EntityNotFoundUserManagementException;
@@ -17,45 +19,61 @@ import uoc.tfg.raulberme.usermanagement.form.AdminLoginForm;
 import uoc.tfg.raulberme.usermanagement.form.UserLoginForm;
 import uoc.tfg.raulberme.usermanagement.repository.AdminRepository;
 import uoc.tfg.raulberme.usermanagement.repository.RegisteredUserRepository;
+import uoc.tfg.raulberme.usermanagement.repository.TokenRepository;
 import uoc.tfg.raulberme.usermanagement.repository.UserRepository;
 import uoc.tfg.raulberme.usermanagement.service.UserManagementService;
 
 @Service
 public class UserManagementServiceImpl implements UserManagementService {
 
+	private static final int LENGTH_TOKEN = 50;
 	private final UserRepository userRepository;
 	private final AdminRepository adminRepository;
 	private final RegisteredUserRepository registeredUserRepository;
+	private final TokenRepository tokenRepository;
 
 	@Autowired
 	public UserManagementServiceImpl(final UserRepository userRepository, final AdminRepository adminRepository,
-			final RegisteredUserRepository registeredUserRepository) {
+			final RegisteredUserRepository registeredUserRepository, final TokenRepository tokenRepository) {
 		this.userRepository = userRepository;
 		this.adminRepository = adminRepository;
 		this.registeredUserRepository = registeredUserRepository;
+		this.tokenRepository = tokenRepository;
 	}
 
 	@Override
-	public void login(final UserLoginForm user) {
-		// TODO Auto-generated method stub
+	public void login(final UserLoginForm user) throws UserManagementException {
+		if (userRepository.existsByUsername(user.getUsername()))
+			throw new UnauthorizedUserManagementException("ERROR: duplicated username.");
+
+		if (userRepository.existsByEmail(user.getEmail()))
+			throw new UnauthorizedUserManagementException("ERROR: duplicated email.");
+
+		registeredUserRepository.save(convertToEntity(user));
 	}
 
 	@Override
 	public void login(final AdminLoginForm admin) {
-		// TODO Auto-generated method stub
+		adminRepository.save(convertToEntity(admin));
 	}
 
 	@Override
-	public Long signin(final String username, final String password) throws UserManagementException {
-		// TODO return token (string)
-		// do (create token) while token exist on BBDD
-		final User user = retrieveUser(username);
+	public String signin(final String username, final String password) throws UserManagementException {
+
+		final User user = retrieveFullUser(userRepository.findByUsername(username));
+
 		if (user == null) {
 			throw new EntityNotFoundUserManagementException("ERROR: user with username '" + username + "' not found.");
 		}
+
+		if (tokenRepository.existsByUser(user)) {
+			throw new UnauthorizedUserManagementException("ERROR: user already authorizate.");
+		}
+
 		if (!user.canSignin()) {
 			throw new UnauthorizedUserManagementException("ERROR: user can't be signed in.");
 		}
+
 		if (!user.getPassword().equals(password)) {
 			if (user instanceof RegisteredUser) {
 				final RegisteredUser registeredUser = (RegisteredUser) user;
@@ -73,22 +91,30 @@ public class UserManagementServiceImpl implements UserManagementService {
 			}
 			throw new UnauthorizedUserManagementException("ERROR: incorrect password.");
 		}
+
 		if (user instanceof RegisteredUser) {
 			((RegisteredUser) user).initiateTries();
 		}
-		return user.getId();
+
+		String code = null;
+		do {
+			code = RandomString.make(LENGTH_TOKEN);
+		} while (tokenRepository.existsById(code));
+
+		final Token token = createToken(code, user);
+		tokenRepository.save(token);
+		return token.getCode();
 	}
 
 	@Override
-	public void signout(final Long id) {
-		// TODO Auto-generated method stub
-		// delete token
-
+	public void signout(final String tokenId) {
+		tokenRepository.deleteById(tokenId);
 	}
 
 	@Override
-	public void updatePassword(final Long id, final String oldPassword, final String newPassword) {
-		final User user = userRepository.getOne(id);
+	public void updatePassword(final String tokenId, final String oldPassword, final String newPassword)
+			throws UserManagementException {
+		final User user = retrieveUserByToken(tokenId);
 		if (oldPassword.equals(user.getPassword())) {
 			user.setPassword(newPassword);
 			userRepository.save(user);
@@ -96,14 +122,18 @@ public class UserManagementServiceImpl implements UserManagementService {
 	}
 
 	@Override
-	public void updateUser(final Long id, final String email, final String currencyId, final String password) {
-		// TODO Auto-generated method stub
-
+	public void updateUser(final String tokenId, final String email, final String currencyId, final String password)
+			throws UserManagementException {
+		final RegisteredUser user = registeredUserRepository.getOne(retrieveUserByToken(tokenId).getId());
+		user.setEmail(email);
+		user.setDefaultCurrency(currencyId);
+		user.setPassword(password);
+		registeredUserRepository.save(user);
 	}
 
 	@Override
-	public void deletedUser(final Long id, final String password) {
-		final RegisteredUser user = registeredUserRepository.getOne(id);
+	public void deletedUser(final String tokenId, final String password) throws UserManagementException {
+		final RegisteredUser user = registeredUserRepository.getOne(retrieveUserByToken(tokenId).getId());
 		if (password.equals(user.getPassword())) {
 			user.setStatus(UserStatusType.DEACTIVATED);
 			registeredUserRepository.save(user);
@@ -126,15 +156,19 @@ public class UserManagementServiceImpl implements UserManagementService {
 	}
 
 	@Override
-	public boolean hasAuthorization(final String token, final Collection<RolUserType> roles) {
-		// TODO
-		// 1 get token + user
-		// 2 compare rol of user with list of roles
-		return false;
+	public boolean hasAuthorization(final String tokenId, final RolUserType rol) throws UserManagementException {
+		// return (!rol.isPresent()||rol.get()==retrieveUserByToken(tokenId).getRol());
+		return rol == retrieveUserByToken(tokenId).getRol();
 	}
 
-	private User retrieveUser(final String username) {
-		final User user = userRepository.findByUsername(username);
+	private User retrieveUserByToken(final String tokenId) throws UserManagementException {
+		final Optional<Token> token = tokenRepository.findById(tokenId);
+		if (!token.isPresent())
+			throw new UnauthorizedUserManagementException("ERROR: user can't be authorizate.");
+		return token.get().getUser();
+	}
+
+	private User retrieveFullUser(final User user) {
 		if (user == null) {
 			return null;
 		}
@@ -151,10 +185,33 @@ public class UserManagementServiceImpl implements UserManagementService {
 
 	}
 
-	private RegisteredUser convertToEntity(final UserLoginForm ratio) {
+	private Token createToken(final String code, final User user) {
 		// @formatter:off
-		//TODO create builder with all params
-		return RegisteredUser.builder().build();
+		return Token.builder()
+				.code(code)
+				.user(user)
+				.build();
+		// @formatter:on
+	}
+
+	private RegisteredUser convertToEntity(final UserLoginForm user) {
+		// @formatter:off
+		return RegisteredUser.builder()
+				.username(user.getUsername())
+				.email(user.getEmail())
+				.password(user.getPassword())
+				.defaultCurrency(user.getDefaultCurrency())
+				.build();
+		// @formatter:on
+	}
+
+	private Admin convertToEntity(final AdminLoginForm admin) {
+		// @formatter:off
+		return Admin.builder()
+				.username(admin.getUsername())
+				.email(admin.getEmail())
+				.password(admin.getPassword())
+				.build();
 		// @formatter:on
 	}
 
