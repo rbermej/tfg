@@ -155,14 +155,16 @@ public class UserManagementServiceImpl implements UserManagementService {
 	}
 
 	@Override
-	public void deletedAdmin(final Long id) {
+	public void deletedAdmin(final String tokenId, final Long id) {
+		comproveAuthorization(tokenId, RolUserType.SUPERADMIN);
 		final Admin admin = adminRepository.getOne(id);
 		admin.setDeleted(true);
 		adminRepository.save(admin);
 	}
 
 	@Override
-	public void lockUser(final Long id) {
+	public void lockUser(final String tokenId, final Long id) {
+		comproveAuthorization(tokenId, RolUserType.ADMIN);
 		final RegisteredUser user = registeredUserRepository.getOne(id);
 		user.setStatus(UserStatusType.BLOQUED);
 		registeredUserRepository.save(user);

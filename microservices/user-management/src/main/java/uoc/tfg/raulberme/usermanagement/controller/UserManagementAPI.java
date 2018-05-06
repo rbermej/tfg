@@ -92,14 +92,14 @@ public class UserManagementAPI {
 
 	@ApiOperation(value = "Delete admin", notes = "Delete the admin")
 	@DeleteMapping("/admins")
-	public void deletedAdmin(@RequestParam final Long id) {
-		service.deletedAdmin(id);
+	public void deletedAdmin(@RequestParam final String tokenId, @RequestParam final Long id) {
+		service.deletedAdmin(tokenId, id);
 	}
 
 	@ApiOperation(value = "Lock user", notes = "Lock the user")
 	@PostMapping("/users/lock")
-	public void lockUser(@RequestParam final Long id) {
-		service.lockUser(id);
+	public void lockUser(@RequestParam final String tokenId, @RequestParam final Long id) {
+		service.lockUser(tokenId, id);
 	}
 
 	@ApiOperation(value = "Comprove authorization", notes = "Comprove if user has authorizate")

@@ -28,9 +28,9 @@ public interface UserManagementService {
 
 	public void deletedUser(final String tokenId, final String password);
 
-	public void deletedAdmin(final Long id);
+	public void deletedAdmin(final String tokenId, final Long id);
 
-	public void lockUser(final Long id);
+	public void lockUser(final String tokenId, final Long id);
 
 	public void comproveAuthorization(final String tokenId, final RolUserType rol);
 
