@@ -1,11 +1,15 @@
 package uoc.tfg.raulberme.usermanagement.service.impl;
 
+import java.util.Collection;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import net.bytebuddy.utility.RandomString;
+import uoc.tfg.raulberme.usermanagement.dto.AdminDTO;
+import uoc.tfg.raulberme.usermanagement.dto.RegisteredUserDTO;
 import uoc.tfg.raulberme.usermanagement.entity.Admin;
 import uoc.tfg.raulberme.usermanagement.entity.RegisteredUser;
 import uoc.tfg.raulberme.usermanagement.entity.RolUserType;
@@ -14,7 +18,6 @@ import uoc.tfg.raulberme.usermanagement.entity.User;
 import uoc.tfg.raulberme.usermanagement.entity.UserStatusType;
 import uoc.tfg.raulberme.usermanagement.exception.EntityNotFoundUserManagementException;
 import uoc.tfg.raulberme.usermanagement.exception.UnauthorizedUserManagementException;
-import uoc.tfg.raulberme.usermanagement.exception.UserManagementException;
 import uoc.tfg.raulberme.usermanagement.form.AdminLoginForm;
 import uoc.tfg.raulberme.usermanagement.form.UserLoginForm;
 import uoc.tfg.raulberme.usermanagement.repository.AdminRepository;
@@ -42,7 +45,19 @@ public class UserManagementServiceImpl implements UserManagementService {
 	}
 
 	@Override
-	public void login(final UserLoginForm user) throws UserManagementException {
+	public Collection<RegisteredUserDTO> listUsers(final String tokenId) {
+		comproveAuthorization(tokenId, RolUserType.ADMIN);
+		return registeredUserRepository.findAll().stream().map(user -> convertToDTO(user)).collect(Collectors.toList());
+	}
+
+	@Override
+	public Collection<AdminDTO> listAdmins(final String tokenId) {
+		comproveAuthorization(tokenId, RolUserType.SUPERADMIN);
+		return adminRepository.findAll().stream().map(admin -> convertToDTO(admin)).collect(Collectors.toList());
+	}
+
+	@Override
+	public void login(final UserLoginForm user) {
 		if (userRepository.existsByUsername(user.getUsername()))
 			throw new UnauthorizedUserManagementException("ERROR: duplicated username.");
 
@@ -58,7 +73,7 @@ public class UserManagementServiceImpl implements UserManagementService {
 	}
 
 	@Override
-	public String signin(final String username, final String password) throws UserManagementException {
+	public String signin(final String username, final String password) {
 
 		final User user = retrieveFullUser(userRepository.findByUsername(username));
 
@@ -112,8 +127,7 @@ public class UserManagementServiceImpl implements UserManagementService {
 	}
 
 	@Override
-	public void updatePassword(final String tokenId, final String oldPassword, final String newPassword)
-			throws UserManagementException {
+	public void updatePassword(final String tokenId, final String oldPassword, final String newPassword) {
 		final User user = retrieveUserByToken(tokenId);
 		if (oldPassword.equals(user.getPassword())) {
 			user.setPassword(newPassword);
@@ -122,8 +136,7 @@ public class UserManagementServiceImpl implements UserManagementService {
 	}
 
 	@Override
-	public void updateUser(final String tokenId, final String email, final String currencyId, final String password)
-			throws UserManagementException {
+	public void updateUser(final String tokenId, final String email, final String currencyId, final String password) {
 		final RegisteredUser user = registeredUserRepository.getOne(retrieveUserByToken(tokenId).getId());
 		user.setEmail(email);
 		user.setDefaultCurrency(currencyId);
@@ -132,7 +145,7 @@ public class UserManagementServiceImpl implements UserManagementService {
 	}
 
 	@Override
-	public void deletedUser(final String tokenId, final String password) throws UserManagementException {
+	public void deletedUser(final String tokenId, final String password) {
 		final RegisteredUser user = registeredUserRepository.getOne(retrieveUserByToken(tokenId).getId());
 		if (password.equals(user.getPassword())) {
 			user.setStatus(UserStatusType.DEACTIVATED);
@@ -156,15 +169,15 @@ public class UserManagementServiceImpl implements UserManagementService {
 	}
 
 	@Override
-	public boolean hasAuthorization(final String tokenId, final RolUserType rol) throws UserManagementException {
-		// return (!rol.isPresent()||rol.get()==retrieveUserByToken(tokenId).getRol());
-		return rol == retrieveUserByToken(tokenId).getRol();
+	public void comproveAuthorization(final String tokenId, final RolUserType rol) {
+		if (rol != retrieveUserByToken(tokenId).getRol())
+			throw new UnauthorizedUserManagementException("ERROR: user can't be authorizate.");
 	}
 
-	private User retrieveUserByToken(final String tokenId) throws UserManagementException {
+	private User retrieveUserByToken(final String tokenId) {
 		final Optional<Token> token = tokenRepository.findById(tokenId);
 		if (!token.isPresent())
-			throw new UnauthorizedUserManagementException("ERROR: user can't be authorizate.");
+			throw new UnauthorizedUserManagementException("ERROR: token not found..");
 		return token.get().getUser();
 	}
 
@@ -211,6 +224,28 @@ public class UserManagementServiceImpl implements UserManagementService {
 				.username(admin.getUsername())
 				.email(admin.getEmail())
 				.password(admin.getPassword())
+				.build();
+		// @formatter:on
+	}
+
+	private RegisteredUserDTO convertToDTO(final RegisteredUser user) {
+		// @formatter:off
+		return RegisteredUserDTO.builder()
+				.id(user.getId())
+				.username(user.getUsername())
+				.email(user.getEmail())
+				.status(user.getStatus())
+				.build();
+		// @formatter:on
+	}
+
+	private AdminDTO convertToDTO(final Admin admin) {
+		// @formatter:off
+		return AdminDTO.builder()
+				.id(admin.getId())
+				.username(admin.getUsername())
+				.email(admin.getEmail())
+				.deleted(admin.isDeleted())
 				.build();
 		// @formatter:on
 	}

@@ -1,6 +1,6 @@
 package uoc.tfg.raulberme.usermanagement.exception;
 
-public class UserManagementException extends Exception {
+public class UserManagementException extends RuntimeException {
 
 	private static final long serialVersionUID = 1L;
 
