@@ -176,10 +176,15 @@ public class UserManagementServiceImpl implements UserManagementService {
 			throw new UnauthorizedUserManagementException("ERROR: user can't be authorizate.");
 	}
 
+	@Override
+	public Long getUserIdByToken(final String tokenId) {
+		return retrieveUserByToken(tokenId).getId();
+	}
+
 	private User retrieveUserByToken(final String tokenId) {
 		final Optional<Token> token = tokenRepository.findById(tokenId);
 		if (!token.isPresent())
-			throw new UnauthorizedUserManagementException("ERROR: token not found..");
+			throw new UnauthorizedUserManagementException("ERROR: token not found.");
 		return token.get().getUser();
 	}
 

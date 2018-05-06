@@ -108,4 +108,10 @@ public class UserManagementAPI {
 		service.comproveAuthorization(tokenId, rol);
 	}
 
+	@ApiOperation(value = "Get id authorization", notes = "Returns user id by token")
+	@GetMapping("/authorizations")
+	public Long getUserIdByToken(@RequestParam final String tokenId) {
+		return service.getUserIdByToken(tokenId);
+	}
+
 }
