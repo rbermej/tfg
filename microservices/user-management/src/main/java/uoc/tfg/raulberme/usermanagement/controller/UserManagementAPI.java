@@ -7,6 +7,7 @@ import javax.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -108,9 +109,9 @@ public class UserManagementAPI {
 		service.comproveAuthorization(tokenId, rol);
 	}
 
-	@ApiOperation(value = "Get id authorization", notes = "Returns user id by token")
-	@GetMapping("/authorizations")
-	public Long getUserIdByToken(@RequestParam final String tokenId) {
+	@ApiOperation(value = "Get id user by token", notes = "Returns user id by token")
+	@GetMapping("/users/{tokenId}")
+	public Long getUserIdByToken(@PathVariable final String tokenId) {
 		return service.getUserIdByToken(tokenId);
 	}
 
