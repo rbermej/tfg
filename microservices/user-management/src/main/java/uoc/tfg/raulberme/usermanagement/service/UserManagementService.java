@@ -34,6 +34,6 @@ public interface UserManagementService {
 
 	public void comproveAuthorization(final String tokenId, final RolUserType rol);
 
-	public Long getUserIdByToken(final String tokenId);
+	public String getUsernameByToken(final String tokenId);
 
 }

@@ -177,8 +177,8 @@ public class UserManagementServiceImpl implements UserManagementService {
 	}
 
 	@Override
-	public Long getUserIdByToken(final String tokenId) {
-		return retrieveUserByToken(tokenId).getId();
+	public String getUsernameByToken(final String tokenId) {
+		return retrieveUserByToken(tokenId).getUsername();
 	}
 
 	private User retrieveUserByToken(final String tokenId) {

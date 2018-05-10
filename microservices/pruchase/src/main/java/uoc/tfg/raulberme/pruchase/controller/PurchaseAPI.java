@@ -1,0 +1,115 @@
+package uoc.tfg.raulberme.pruchase.controller;
+
+import java.util.Collection;
+import java.util.Optional;
+
+import javax.validation.Valid;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.RestController;
+
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+import uoc.tfg.raulberme.pruchase.dto.AdDTO;
+import uoc.tfg.raulberme.pruchase.dto.PurchaseRequestDTO;
+import uoc.tfg.raulberme.pruchase.form.AdForm;
+import uoc.tfg.raulberme.pruchase.service.PurchaseService;
+
+@RestController
+@RequestMapping("/purchase")
+@Api(value = "Purchase", tags = { "Purchase" })
+public class PurchaseAPI {
+
+	private final PurchaseService service;
+
+	@Autowired
+	public PurchaseAPI(PurchaseService service) {
+		this.service = service;
+	}
+
+	@ApiOperation(value = "Get all Ads", notes = "Returns all ads")
+	@GetMapping("/ads")
+	public @ResponseBody Collection<AdDTO> listAdsWithOptionalCurrencies(
+			@RequestParam(name = "from") final Optional<String> offeredCurrency,
+			@RequestParam(name = "to") final Optional<String> demandedCurrency) {
+		return service.listActivedAdsWithOptionalCurrencies(offeredCurrency, demandedCurrency);
+	}
+
+	@ApiOperation(value = "Get all Ads by Seller", notes = "Returns all ads by seller")
+	@GetMapping("/ads/seller")
+	public @ResponseBody Collection<AdDTO> listAdsBySeller(@RequestParam final String tokenId) {
+		return service.listAdsBySeller(tokenId);
+	}
+
+	@ApiOperation(value = "Create an Ad", notes = "Create a new ad")
+	@PutMapping("/ads")
+	public void createAd(@RequestParam final String tokenId, @Valid @RequestBody final AdForm ad) {
+		service.createAd(tokenId, ad);
+	}
+
+	@ApiOperation(value = "Get an Ad", notes = "Get an ad by its id")
+	@GetMapping("/ads/{adId}")
+	public void getAd(@PathVariable final Long adId) {
+		service.getAd(adId);
+	}
+
+	@ApiOperation(value = "Update an Ad", notes = "Update an ad")
+	@PostMapping("/ads")
+	public void updatetAd(@RequestParam final String tokenId, @Valid @RequestBody final AdForm ad) {
+		service.updatetAd(tokenId, ad);
+	}
+
+	@ApiOperation(value = "Delete an Ad", notes = "Delete an ad")
+	@DeleteMapping("/ads/{adId}")
+	public void removeAd(@RequestParam final String tokenId, @PathVariable final Long adId) {
+		service.removeAd(tokenId, adId);
+	}
+
+	@ApiOperation(value = "Buy an Ad", notes = "Buy an ad")
+	@PostMapping("/ads/{adId}/buy")
+	public void buyAd(@RequestParam final String tokenId, @PathVariable final Long adId) {
+		service.buyAd(tokenId, adId);
+	}
+
+	@ApiOperation(value = "Accept a Purchase Request", notes = "Accept a purchase request to sell one ad")
+	@PostMapping("/requests/{requestId}/sell")
+	public void sellAd(@RequestParam final String tokenId, @PathVariable final Long requestId) {
+		service.sellAd(tokenId, requestId);
+	}
+
+	@ApiOperation(value = "Hide an Ad", notes = "Hide an ad")
+	@PostMapping("/ads/{adId}/hide")
+	public void hideAd(@RequestParam final String tokenId, @PathVariable final Long adId) {
+		service.hideAd(tokenId, adId);
+	}
+
+	@ApiOperation(value = "Republish an Ad", notes = "Republish an ad")
+	@PostMapping("/ads/{adId}/republish")
+	public void republishAd(@RequestParam final String tokenId, @PathVariable final Long adId,
+			@RequestParam final Float minimumExpectedAmount) {
+		service.republishAd(tokenId, adId, minimumExpectedAmount);
+	}
+
+	@ApiOperation(value = "Lock an Ad", notes = "Lock an ad")
+	@PostMapping("/ads/{adId}/lock")
+	public void lockAd(@RequestParam final String tokenId, @PathVariable final Long adId) {
+		service.lockAd(tokenId, adId);
+	}
+
+	@ApiOperation(value = "Get all request by Seller", notes = "Get all request by seller")
+	@GetMapping("/requests")
+	public @ResponseBody Collection<PurchaseRequestDTO> listPurchaseRequestsBySeller(
+			@RequestParam final String tokenId) {
+		return service.listPurchaseRequestsBySeller(tokenId);
+	}
+
+}

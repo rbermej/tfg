@@ -68,13 +68,15 @@ public class UserManagementAPI {
 		return service.signin(username, password);
 	}
 
+	@ApiOperation(value = "Signout user", notes = "Signou user (registered user, admin or superadmin)")
+	@GetMapping("/signout")
 	public void signout(String tokenId) {
 		service.signout(tokenId);
 	}
 
 	@ApiOperation(value = "Update password", notes = "Update the old password with the new password")
-	@PostMapping("/password")
-	public void updatePassword(@RequestParam final String tokenId, @RequestParam final String oldPassword,
+	@PostMapping("/users/{tokenId}/password")
+	public void updatePassword(@PathVariable final String tokenId, @RequestParam final String oldPassword,
 			@RequestParam final String newPassword) {
 		service.updatePassword(tokenId, oldPassword, newPassword);
 	}
@@ -86,20 +88,20 @@ public class UserManagementAPI {
 	}
 
 	@ApiOperation(value = "Delete user", notes = "Deactivate the user")
-	@DeleteMapping("/users")
-	public void deletedUser(@RequestParam final String tokenId, @RequestParam final String password) {
+	@DeleteMapping("/users/{tokenId}")
+	public void deletedUser(@PathVariable final String tokenId, @RequestParam final String password) {
 		service.deletedUser(tokenId, password);
 	}
 
 	@ApiOperation(value = "Delete admin", notes = "Delete the admin")
-	@DeleteMapping("/admins")
-	public void deletedAdmin(@RequestParam final String tokenId, @RequestParam final Long id) {
+	@DeleteMapping("/admins/{username}")
+	public void deletedAdmin(@RequestParam final String tokenId, @PathVariable final Long id) {
 		service.deletedAdmin(tokenId, id);
 	}
 
 	@ApiOperation(value = "Lock user", notes = "Lock the user")
-	@PostMapping("/users/lock")
-	public void lockUser(@RequestParam final String tokenId, @RequestParam final Long id) {
+	@PostMapping("/users/{username}/lock")
+	public void lockUser(@RequestParam final String tokenId, @PathVariable final Long id) {
 		service.lockUser(tokenId, id);
 	}
 
@@ -109,10 +111,10 @@ public class UserManagementAPI {
 		service.comproveAuthorization(tokenId, rol);
 	}
 
-	@ApiOperation(value = "Get id user by token", notes = "Returns user id by token")
+	@ApiOperation(value = "Get user's username by token", notes = "Returns user's username by token")
 	@GetMapping("/users/{tokenId}")
-	public Long getUserIdByToken(@PathVariable final String tokenId) {
-		return service.getUserIdByToken(tokenId);
+	public String getUsernameByToken(@PathVariable final String tokenId) {
+		return service.getUsernameByToken(tokenId);
 	}
 
 }
