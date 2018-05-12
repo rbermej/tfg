@@ -86,25 +86,6 @@ public class PurchaseAPI {
 		service.sellAd(tokenId, requestId);
 	}
 
-	@ApiOperation(value = "Hide an Ad", notes = "Hide an ad")
-	@PostMapping("/ads/{adId}/hide")
-	public void hideAd(@RequestParam final String tokenId, @PathVariable final Long adId) {
-		service.hideAd(tokenId, adId);
-	}
-
-	@ApiOperation(value = "Republish an Ad", notes = "Republish an ad")
-	@PostMapping("/ads/{adId}/republish")
-	public void republishAd(@RequestParam final String tokenId, @PathVariable final Long adId,
-			@RequestParam final Float minimumExpectedAmount) {
-		service.republishAd(tokenId, adId, minimumExpectedAmount);
-	}
-
-	@ApiOperation(value = "Lock an Ad", notes = "Lock an ad")
-	@PostMapping("/ads/{adId}/lock")
-	public void lockAd(@RequestParam final String tokenId, @PathVariable final Long adId) {
-		service.lockAd(tokenId, adId);
-	}
-
 	@ApiOperation(value = "Get all request by Seller", notes = "Get all request by seller")
 	@GetMapping("/requests")
 	public @ResponseBody Collection<PurchaseRequestDTO> listPurchaseRequestsBySeller(

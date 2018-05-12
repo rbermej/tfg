@@ -85,7 +85,7 @@ public class PurchaseServiceImpl implements PurchaseService {
 		final Ad ad = adRepository.getOne(adForm.getId());
 		if (!seller.equals(ad.getSeller()))
 			throw new UnauthorizedPurchaseException(ERROR_NOT_SELLER_OF_AD);
-		if (AdStatusType.ACTIVATED != ad.getStatus() && AdStatusType.DEACTIVATED != ad.getStatus())
+		if (AdStatusType.ACTIVATED != ad.getStatus())
 			throw new UnauthorizedPurchaseException("ERROR: Ad can't be updated");
 		adRepository.save(updateAd(ad, adForm));
 	}
@@ -96,7 +96,7 @@ public class PurchaseServiceImpl implements PurchaseService {
 		final Ad ad = adRepository.getOne(adId);
 		if (!seller.equals(ad.getSeller()))
 			throw new UnauthorizedPurchaseException(ERROR_NOT_SELLER_OF_AD);
-		if (AdStatusType.ACTIVATED != ad.getStatus() && AdStatusType.DEACTIVATED != ad.getStatus())
+		if (AdStatusType.ACTIVATED != ad.getStatus())
 			throw new UnauthorizedPurchaseException("ERROR: Ad can't be removed");
 		adRepository.delete(ad);
 	}
@@ -115,7 +115,7 @@ public class PurchaseServiceImpl implements PurchaseService {
 		final Ad ad = purchaseRequest.getAd();
 		if (!seller.equals(ad.getSeller()))
 			throw new UnauthorizedPurchaseException(ERROR_NOT_SELLER_OF_AD);
-		if (AdStatusType.DEACTIVATED != ad.getStatus())
+		if (AdStatusType.ACTIVATED != ad.getStatus())
 			throw new UnauthorizedPurchaseException("ERROR: Ad can't be sold");
 		// saleRepository.save(createSale(purchaseRequest));
 		ad.setSale(createSale(purchaseRequest));
@@ -131,42 +131,6 @@ public class PurchaseServiceImpl implements PurchaseService {
 		if (!applicant.equals(purchaseRequest.getApplicant()))
 			throw new UnauthorizedPurchaseException("ERROR: You aren't the applicant of this purchase request");
 		purchaseRequestRepository.delete(purchaseRequest);
-	}
-
-	@Override
-	public void hideAd(final String tokenId, final Long adId) {
-		final String seller = userManagementProvider.retrieveUsernameByToken(tokenId);
-		final Ad ad = adRepository.getOne(adId);
-		if (!seller.equals(ad.getSeller()))
-			throw new UnauthorizedPurchaseException(ERROR_NOT_SELLER_OF_AD);
-		if (AdStatusType.ACTIVATED != ad.getStatus())
-			throw new UnauthorizedPurchaseException("ERROR: Ad can't be hide");
-		ad.setStatus(AdStatusType.DEACTIVATED);
-		adRepository.save(ad);
-	}
-
-	@Override
-	public void republishAd(final String tokenId, final Long adId, final Float minimumExpectedAmount) {
-		final String seller = userManagementProvider.retrieveUsernameByToken(tokenId);
-		final Ad ad = adRepository.getOne(adId);
-		if (!seller.equals(ad.getSeller()))
-			throw new UnauthorizedPurchaseException(ERROR_NOT_SELLER_OF_AD);
-		if (AdStatusType.DEACTIVATED != ad.getStatus())
-			throw new UnauthorizedPurchaseException("ERROR: Ad can't be republished");
-		ad.setStatus(AdStatusType.ACTIVATED);
-		adRepository.save(ad);
-	}
-
-	@Override
-	public void lockAd(final String tokenId, final Long adId) {
-		final String seller = userManagementProvider.retrieveUsernameByToken(tokenId);
-		final Ad ad = adRepository.getOne(adId);
-		if (!seller.equals(ad.getSeller()))
-			throw new UnauthorizedPurchaseException(ERROR_NOT_SELLER_OF_AD);
-		if (AdStatusType.ACTIVATED != ad.getStatus())
-			throw new UnauthorizedPurchaseException("ERROR: Ad can't be canceled");
-		ad.setStatus(AdStatusType.BLOQUED);
-		adRepository.save(ad);
 	}
 
 	@Override
@@ -186,16 +150,17 @@ public class PurchaseServiceImpl implements PurchaseService {
 	}
 
 	private AdDTO convertToDTO(final Ad ad) {
+		final String buyer = ad.getSale() != null ? ad.getSale().getBuyer() : null;
 		// @formatter:off
 		return AdDTO.builder()
 				.id(ad.getId())
-				.amount(ad.getAmount())
-				.minimumExpectedAmount(ad.getMinimumExpectedAmount())
-				.location(ad.getLocation())
-				.offeredCurrency(ad.getOfferedCurrency())
+				.demandedAmount(ad.getDemandedAmount())
 				.demandedCurrency(ad.getDemandedCurrency())
+				.offeredAmount(ad.getOfferedAmount())
+				.offeredCurrency(ad.getOfferedCurrency())
 				.seller(ad.getSeller())
-				.buyer(ad.getSale().getBuyer())
+				.location(ad.getLocation())
+				.buyer(buyer)
 				.status(ad.getStatus())
 				.date(ad.getDate())
 				.build();
@@ -203,31 +168,29 @@ public class PurchaseServiceImpl implements PurchaseService {
 	}
 
 	private PurchaseRequestDTO convertToDTO(final PurchaseRequest purchaseRequest) {
+		final Ad ad = purchaseRequest.getAd();
 		// @formatter:off
 		return PurchaseRequestDTO.builder()
 				.id(purchaseRequest.getId())
-				.amount(purchaseRequest.getAd().getAmount())
-				.minimumExpectedAmount(purchaseRequest.getAd().getMinimumExpectedAmount())
-				.location(purchaseRequest.getAd().getLocation())
-				.offeredCurrency(purchaseRequest.getAd().getOfferedCurrency())
-				.demandedCurrency(purchaseRequest.getAd().getDemandedCurrency())
-				.seller(purchaseRequest.getAd().getSeller())
-				.buyer(purchaseRequest.getAd().getSale().getBuyer())
-				.status(purchaseRequest.getAd().getStatus())
+				.demandedAmount(ad.getDemandedAmount())
+				.demandedCurrency(ad.getDemandedCurrency())
+				.offeredAmount(ad.getOfferedAmount())
+				.offeredCurrency(ad.getOfferedCurrency())
+				.seller(ad.getSeller())
+				.location(ad.getLocation())
+				.buyer(purchaseRequest.getApplicant())
+				.status(ad.getStatus())
 				.date(purchaseRequest.getDate())
 				.build();
 		// @formatter:on
 	}
 
 	private PurchaseRequest createPurchaseRequest(final String applicant, final Ad ad) {
-		final float amount = currencyExchangeProvider.calculateAmount(ad.getOfferedCurrency(), ad.getDemandedCurrency(),
-				ad.getAmount());
 		// @formatter:off
 		return PurchaseRequest.builder()
 				.applicant(applicant)
 				.ad(ad)
 				.date(LocalDateTime.now())
-				.amount(amount)
 				.build();
 		// @formatter:on
 	}
@@ -237,7 +200,6 @@ public class PurchaseServiceImpl implements PurchaseService {
 		return Sale.builder()
 				.buyer(request.getApplicant())
 				.date(LocalDateTime.now())
-				.amount(request.getAmount())
 				.build();
 		// @formatter:on
 	}
@@ -245,22 +207,22 @@ public class PurchaseServiceImpl implements PurchaseService {
 	private Ad createAd(final AdForm adForm, final String seller) {
 		// @formatter:off
 		return Ad.builder()
-				.amount(adForm.getAmount())
-				.minimumExpectedAmount(adForm.getMinimumExpectedAmount())
-				.location(adForm.getLocation())
+				.demandedAmount(adForm.getDemandedAmount())
+				.demandedCurrency(adForm.getDemandedCurrency())
 				.offeredCurrency(adForm.getOfferedCurrency())
 				.demandedCurrency(adForm.getDemandedCurrency())
 				.seller(seller)
+				.location(adForm.getLocation())
 				.build();
 		// @formatter:on
 	}
 
 	private Ad updateAd(final Ad ad, final AdForm adForm) {
-		ad.setAmount(adForm.getAmount());
-		ad.setMinimumExpectedAmount(adForm.getMinimumExpectedAmount());
-		ad.setLocation(adForm.getLocation());
+		ad.setDemandedAmount(adForm.getDemandedAmount());
 		ad.setOfferedCurrency(adForm.getOfferedCurrency());
 		ad.setDemandedCurrency(adForm.getDemandedCurrency());
+		ad.setDemandedCurrency(adForm.getDemandedCurrency());
+		ad.setLocation(adForm.getLocation());
 		ad.setDate(LocalDateTime.now());
 		return ad;
 	}

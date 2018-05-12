@@ -28,12 +28,6 @@ public interface PurchaseService {
 
 	public void cancelRequest(final String tokenId, final Long purchaseRequestId);
 
-	public void hideAd(final String tokenId, final Long adId);
-
-	public void republishAd(final String tokenId, final Long adId, final Float minimumExpectedAmount);
-
-	public void lockAd(final String tokenId, final Long adId);
-
 	public Collection<PurchaseRequestDTO> listPurchaseRequestsBySeller(final String tokenId);
 
 	public Collection<PurchaseRequestDTO> listPurchaseRequestsByApplicant(final String tokenId);

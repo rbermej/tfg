@@ -10,17 +10,18 @@ public class AdForm {
 	private Long id;
 
 	@NotNull
-	private Float amount;
-
-	private Float minimumExpectedAmount;
-
-	@NotNull
-	private String location;
+	private Float offeredAmount;
 
 	@NotNull
 	private String offeredCurrency;
 
 	@NotNull
+	private Float demandedAmount;
+
+	@NotNull
 	private String demandedCurrency;
+
+	@NotNull
+	private String location;
 
 }

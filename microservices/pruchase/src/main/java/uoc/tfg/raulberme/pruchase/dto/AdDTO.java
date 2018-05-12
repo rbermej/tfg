@@ -22,29 +22,29 @@ public class AdDTO implements Serializable {
 	@JsonProperty
 	private Long id;
 
-	@ApiModelProperty(value = "The ad's amount")
+	@ApiModelProperty(value = "The ad's offered amount")
 	@JsonProperty
-	private Float amount;
+	private Float offeredAmount;
 
-	@ApiModelProperty(value = "The ad's minimum expected amount", required = false)
-	@JsonProperty
-	private Float minimumExpectedAmount;
-
-	@ApiModelProperty(value = "The ad's location")
-	@JsonProperty
-	private String location;
-
-	@ApiModelProperty(value = "The ad's offeredCurrency")
+	@ApiModelProperty(value = "The ad's offered currency")
 	@JsonProperty
 	private String offeredCurrency;
 
-	@ApiModelProperty(value = "The ad's demandedCurrency")
+	@ApiModelProperty(value = "The ad's demanded amount")
+	@JsonProperty
+	private Float demandedAmount;
+
+	@ApiModelProperty(value = "The ad's demanded currency")
 	@JsonProperty
 	private String demandedCurrency;
 
 	@ApiModelProperty(value = "The ad's seller")
 	@JsonProperty
 	private String seller;
+
+	@ApiModelProperty(value = "The ad's location")
+	@JsonProperty
+	private String location;
 
 	@ApiModelProperty(value = "The ad's buyer", required = false)
 	@JsonProperty
