@@ -1,6 +1,5 @@
 package uoc.tfg.raulberme.currencyexchange.provider.impl;
 
-import java.io.IOException;
 import java.time.LocalDate;
 import java.util.Map;
 
@@ -13,12 +12,15 @@ import org.springframework.web.client.RestTemplate;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import uoc.tfg.raulberme.currencyexchange.exception.NotFoundCurrencyExchangeException;
 import uoc.tfg.raulberme.currencyexchange.provider.RatioProvider;
 
 @Component
 public class OpenExchangeRatesProvider implements RatioProvider {
 
+	private static final String ERROR_CURRENCY_EXCHANGE_NOT_AVAILABLE = "ERROR: Currency Exchange not available.";
 	private static final String RESOURCE_URL = "https://openexchangerates.org/api/historical/";
+
 	private final RestTemplate restTemplate;
 	private final ObjectMapper mapper;
 	private final String baseCurrencyISO;
@@ -39,13 +41,13 @@ public class OpenExchangeRatesProvider implements RatioProvider {
 
 	@Override
 	public Map<String, Float> findByDay(final LocalDate day) {
-		ResponseEntity<String> response = restTemplate.getForEntity(getPath(day), String.class);
 		try {
+			ResponseEntity<String> response = restTemplate.getForEntity(getPath(day), String.class);
 			final String ratios = mapper.readTree(response.getBody()).path("rates").toString();
 			return mapper.readValue(ratios, new TypeReference<Map<String, Float>>() {
 			});
-		} catch (IOException e) {
-			return null;
+		} catch (Exception e) {
+			throw new NotFoundCurrencyExchangeException(ERROR_CURRENCY_EXCHANGE_NOT_AVAILABLE);
 		}
 	}
 

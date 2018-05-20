@@ -16,7 +16,7 @@ public interface PurchaseService {
 
 	public void createAd(final String tokenId, final AdForm ad);
 
-	public AdDTO getAd(final Long adId);
+	public AdDTO retrieveAd(final Long adId);
 
 	public void updatetAd(final String tokenId, final AdForm ad);
 
@@ -26,7 +26,7 @@ public interface PurchaseService {
 
 	public void sellAd(final String tokenId, final Long requestId);
 
-	public void cancelRequest(final String tokenId, final Long purchaseRequestId);
+	public void removePurchaseRequest(final String tokenId, final Long purchaseRequestId);
 
 	public Collection<PurchaseRequestDTO> listPurchaseRequestsBySeller(final String tokenId);
 

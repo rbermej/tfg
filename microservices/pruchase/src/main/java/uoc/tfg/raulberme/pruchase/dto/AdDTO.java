@@ -14,7 +14,7 @@ import uoc.tfg.raulberme.pruchase.entity.AdStatusType;
 @ApiModel(value = "RatioDTO", description = "Complete data of a Rest Ratio")
 @Data
 @Builder
-public class AdDTO implements Serializable {
+public class AdDTO implements Serializable, Comparable<AdDTO> {
 
 	private static final long serialVersionUID = 1L;
 
@@ -57,5 +57,10 @@ public class AdDTO implements Serializable {
 	@ApiModelProperty(value = "The ad's date")
 	@JsonProperty
 	private LocalDateTime date;
+
+	@Override
+	public int compareTo(AdDTO other) {
+		return other.getDate().compareTo(this.getDate());
+	}
 
 }

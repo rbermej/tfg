@@ -7,11 +7,13 @@ import org.springframework.web.client.RestTemplate;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import uoc.tfg.raulberme.currencyexchange.entity.RolUserType;
+import uoc.tfg.raulberme.currencyexchange.exception.UnauthorizedCurrencyExchangeException;
 import uoc.tfg.raulberme.currencyexchange.provider.UserManagementProvider;
 
 @Component
 public class UserManagementLocalProvider implements UserManagementProvider {
 
+	private static final String ERROR_USER_CAN_T_BE_AUTHORIZATED = "ERROR: User can't be authorizated.";
 	private static final String RESOURCE_URL = "http://localhost:8081/user-management/";
 
 	private final RestTemplate restTemplate;
@@ -23,7 +25,11 @@ public class UserManagementLocalProvider implements UserManagementProvider {
 
 	@Override
 	public void comproveAuthorization(final String tokenId, final RolUserType rol) {
-		restTemplate.getForEntity(getPath(tokenId, rol), Boolean.class).getBody();
+		try {
+			restTemplate.getForEntity(getPath(tokenId, rol), Void.class).getBody();
+		} catch (Exception e) {
+			throw new UnauthorizedCurrencyExchangeException(ERROR_USER_CAN_T_BE_AUTHORIZATED);
+		}
 	}
 
 	private String getPath(final String tokenId, final RolUserType rol) {

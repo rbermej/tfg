@@ -20,9 +20,9 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import uoc.tfg.raulberme.usermanagement.dto.AdminDTO;
 import uoc.tfg.raulberme.usermanagement.dto.RegisteredUserDTO;
-import uoc.tfg.raulberme.usermanagement.entity.RegisteredUser;
 import uoc.tfg.raulberme.usermanagement.entity.RolUserType;
 import uoc.tfg.raulberme.usermanagement.form.AdminLoginForm;
+import uoc.tfg.raulberme.usermanagement.form.RegisteredUserUpdateForm;
 import uoc.tfg.raulberme.usermanagement.form.UserLoginForm;
 import uoc.tfg.raulberme.usermanagement.service.UserManagementService;
 
@@ -58,19 +58,19 @@ public class UserManagementAPI {
 
 	@ApiOperation(value = "Login admin", notes = "Login admin")
 	@PutMapping("/admins")
-	public void login(@Valid @RequestBody final AdminLoginForm admin) {
-		service.login(admin);
+	public void login(@PathVariable final String tokenId, @Valid @RequestBody final AdminLoginForm admin) {
+		service.login(tokenId, admin);
 	}
 
 	@ApiOperation(value = "Signin user", notes = "Signin user (registered user, admin or superadmin)")
 	@GetMapping("/signin")
-	public String signin(@RequestParam final String username, @RequestParam final String password) {
+	public @ResponseBody String signin(@RequestParam final String username, @RequestParam final String password) {
 		return service.signin(username, password);
 	}
 
 	@ApiOperation(value = "Signout user", notes = "Signou user (registered user, admin or superadmin)")
-	@GetMapping("/signout")
-	public void signout(String tokenId) {
+	@PostMapping("/signout")
+	public void signout(@RequestParam final String tokenId) {
 		service.signout(tokenId);
 	}
 
@@ -83,8 +83,8 @@ public class UserManagementAPI {
 
 	@ApiOperation(value = "Update user", notes = "Update the user")
 	@PostMapping("/users")
-	public void updateUser(final String tokenId, @RequestBody final RegisteredUser user) {
-		service.updateUser(tokenId, user.getEmail(), user.getDefaultCurrency(), user.getPassword());
+	public void updateUser(@RequestParam final String tokenId, @RequestBody final RegisteredUserUpdateForm userForm) {
+		service.updateUser(tokenId, userForm);
 	}
 
 	@ApiOperation(value = "Delete user", notes = "Deactivate the user")
@@ -94,13 +94,13 @@ public class UserManagementAPI {
 	}
 
 	@ApiOperation(value = "Delete admin", notes = "Delete the admin")
-	@DeleteMapping("/admins/{username}")
+	@DeleteMapping("/admins/{id}")
 	public void deletedAdmin(@RequestParam final String tokenId, @PathVariable final Long id) {
 		service.deletedAdmin(tokenId, id);
 	}
 
 	@ApiOperation(value = "Lock user", notes = "Lock the user")
-	@PostMapping("/users/{username}/lock")
+	@PostMapping("/users/{id}/lock")
 	public void lockUser(@RequestParam final String tokenId, @PathVariable final Long id) {
 		service.lockUser(tokenId, id);
 	}
@@ -113,8 +113,15 @@ public class UserManagementAPI {
 
 	@ApiOperation(value = "Get user's username by token", notes = "Returns user's username by token")
 	@GetMapping("/users/{tokenId}")
-	public String getUsernameByToken(@PathVariable final String tokenId) {
+	public @ResponseBody String getUsernameByToken(@PathVariable final String tokenId) {
 		return service.getUsernameByToken(tokenId);
+	}
+
+	@ApiOperation(value = "Exists User by username", notes = "Exists user by username")
+	@GetMapping("/users/exists")
+	public @ResponseBody boolean existsUserByUsername(@RequestParam final String tokenId,
+			@RequestParam final String username) {
+		return service.existsUserByUsername(tokenId, username);
 	}
 
 }

@@ -6,6 +6,7 @@ import uoc.tfg.raulberme.usermanagement.dto.AdminDTO;
 import uoc.tfg.raulberme.usermanagement.dto.RegisteredUserDTO;
 import uoc.tfg.raulberme.usermanagement.entity.RolUserType;
 import uoc.tfg.raulberme.usermanagement.form.AdminLoginForm;
+import uoc.tfg.raulberme.usermanagement.form.RegisteredUserUpdateForm;
 import uoc.tfg.raulberme.usermanagement.form.UserLoginForm;
 
 public interface UserManagementService {
@@ -16,7 +17,7 @@ public interface UserManagementService {
 
 	public void login(final UserLoginForm user);
 
-	public void login(final AdminLoginForm admin);
+	public void login(final String tokenId, final AdminLoginForm admin);
 
 	public String signin(final String username, final String password);
 
@@ -24,7 +25,7 @@ public interface UserManagementService {
 
 	public void updatePassword(final String tokenId, final String oldPassword, final String newPassword);
 
-	public void updateUser(final String tokenId, final String email, final String currencyId, final String password);
+	public void updateUser(final String tokenId, final RegisteredUserUpdateForm userForm);
 
 	public void deletedUser(final String tokenId, final String password);
 
@@ -35,5 +36,7 @@ public interface UserManagementService {
 	public void comproveAuthorization(final String tokenId, final RolUserType rol);
 
 	public String getUsernameByToken(final String tokenId);
+
+	public boolean existsUserByUsername(final String tokenId, final String username);
 
 }

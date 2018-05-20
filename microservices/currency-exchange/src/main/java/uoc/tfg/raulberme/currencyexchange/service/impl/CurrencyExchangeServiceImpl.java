@@ -17,6 +17,8 @@ import uoc.tfg.raulberme.currencyexchange.dto.ExchangeCurrencyDTO;
 import uoc.tfg.raulberme.currencyexchange.dto.RatioDTO;
 import uoc.tfg.raulberme.currencyexchange.entity.Currency;
 import uoc.tfg.raulberme.currencyexchange.entity.Ratio;
+import uoc.tfg.raulberme.currencyexchange.entity.RolUserType;
+import uoc.tfg.raulberme.currencyexchange.exception.NotFoundCurrencyExchangeException;
 import uoc.tfg.raulberme.currencyexchange.provider.RatioProvider;
 import uoc.tfg.raulberme.currencyexchange.provider.UserManagementProvider;
 import uoc.tfg.raulberme.currencyexchange.repository.CurrencyRepository;
@@ -27,7 +29,9 @@ import uoc.tfg.raulberme.currencyexchange.service.CurrencyExchangeService;
 @Log
 public class CurrencyExchangeServiceImpl implements CurrencyExchangeService {
 
-	private static final String RATIO_NOT_FOUND_ACCESSING_EXTERNAL_PROVIDER = "Ratio not found, accessing on external excange currency provider";
+	private static final String ERROR_CURRENCY_NOT_FOUND = "ERROR: Currency not found.";
+	private static final String RATIO_NOT_FOUND_ACCESSING_EXTERNAL_PROVIDER = "Ratio not found, accessing on external excange currency provider.";
+
 	private final String systemBaseCurrencyId;
 	private final CurrencyRepository currencyRepository;
 	private final RatioRepository ratioRepository;
@@ -46,23 +50,19 @@ public class CurrencyExchangeServiceImpl implements CurrencyExchangeService {
 	}
 
 	@Override
-	public Collection<CurrencyDTO> listAllCurrencies() {
-		// userManagementProvider.comproveAuthorization(tokenId,
-		// RolUserType.REGISTERED_USER);
+	public Collection<CurrencyDTO> listAllCurrencies(final String tokenId) {
+		userManagementProvider.comproveAuthorization(tokenId, RolUserType.REGISTERED_USER);
 		return currencyRepository.findAll().stream().map(this::convertToDto).collect(Collectors.toList());
 	}
 
 	@Override
-	public ExchangeCurrencyDTO listRatiosByDay(final LocalDate day) {
-		// userManagementProvider.comproveAuthorization(tokenId,
-		// RolUserType.REGISTERED_USER);
-		return listRatiosByDay(systemBaseCurrencyId, day);
+	public ExchangeCurrencyDTO listRatiosByDay(final String tokenId, final LocalDate day) {
+		return listRatiosByDay(tokenId, systemBaseCurrencyId, day);
 	}
 
 	@Override
-	public ExchangeCurrencyDTO listRatiosByDay(final String baseCurrencyId, final LocalDate day) {
-		// userManagementProvider.comproveAuthorization(tokenId,
-		// RolUserType.REGISTERED_USER);
+	public ExchangeCurrencyDTO listRatiosByDay(final String tokenId, final String baseCurrencyId, final LocalDate day) {
+		userManagementProvider.comproveAuthorization(tokenId, RolUserType.REGISTERED_USER);
 
 		if (!ratioRepository.existsByDay(day))
 			findAndSaveExternalRatios(day);
@@ -99,6 +99,9 @@ public class CurrencyExchangeServiceImpl implements CurrencyExchangeService {
 	@Override
 	public float calculateAmount(final String baseCurrencyId, final String destinationCurrencyId, final Float quantity,
 			final LocalDate day) {
+
+		if (!currencyRepository.existsById(baseCurrencyId) || !currencyRepository.existsById(destinationCurrencyId))
+			throw new NotFoundCurrencyExchangeException(ERROR_CURRENCY_NOT_FOUND);
 
 		if (baseCurrencyId.equalsIgnoreCase(destinationCurrencyId))
 			return quantity;

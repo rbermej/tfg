@@ -6,11 +6,14 @@ import org.springframework.web.client.RestTemplate;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import uoc.tfg.raulberme.pruchase.exception.NotFoundPurchaseException;
 import uoc.tfg.raulberme.pruchase.provider.CurrencyExchangeProvider;
 
 @Component
 public class CurrencyExchangeLocalProvider implements CurrencyExchangeProvider {
 
+	private static final String ERROR_CURRENCY_EXCHANGE_NOT_FOUND = "ERROR: Currency exchange not found.";
+	private static final String ERROR_CURRENCY_NOT_FOUND = "ERROR: Currency not found.";
 	private static final String RESOURCE_URL = "http://localhost:8082/currency-exchange/";
 
 	private final RestTemplate restTemplate;
@@ -30,7 +33,13 @@ public class CurrencyExchangeLocalProvider implements CurrencyExchangeProvider {
 								.append("&quantity=").append(quantity)
 								.toString();
 		// @formatter:on
-		return restTemplate.getForEntity(path, Float.class).getBody();
+		try {
+			return restTemplate.getForEntity(path, Float.class).getBody();
+		} catch (Exception e) {
+			if (e.getMessage().contains("404"))
+				throw new NotFoundPurchaseException(ERROR_CURRENCY_NOT_FOUND);
+			throw new NotFoundPurchaseException(ERROR_CURRENCY_EXCHANGE_NOT_FOUND);
+		}
 	}
 
 }

@@ -16,9 +16,6 @@ public class AdForm {
 	private String offeredCurrency;
 
 	@NotNull
-	private Float demandedAmount;
-
-	@NotNull
 	private String demandedCurrency;
 
 	@NotNull

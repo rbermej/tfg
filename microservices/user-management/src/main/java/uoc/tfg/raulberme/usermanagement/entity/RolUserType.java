@@ -1,7 +1,7 @@
 package uoc.tfg.raulberme.usermanagement.entity;
 
 public enum RolUserType {
-	SUPERADMIN((byte) 0), ADMIN((byte) 1), REGISTERED_USER((byte) 2);
+	SUPERADMIN((byte) 0), ADMIN((byte) 1), REGISTERED_USER((byte) 2), SYSTEM((byte) 3);
 
 	private byte id;
 

@@ -7,11 +7,13 @@ import org.springframework.web.client.RestTemplate;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import uoc.tfg.raulberme.pruchase.entity.RolUserType;
+import uoc.tfg.raulberme.pruchase.exception.UnauthorizedPurchaseException;
 import uoc.tfg.raulberme.pruchase.provider.UserManagementProvider;
 
 @Component
 public class UserManagementLocalProvider implements UserManagementProvider {
 
+	private static final String ERROR_USER_CANT_BE_AUTHORIZATED = "ERROR: User can't be authorizated.";
 	private static final String RESOURCE_URL = "http://localhost:8081/user-management/";
 
 	private final RestTemplate restTemplate;
@@ -30,7 +32,11 @@ public class UserManagementLocalProvider implements UserManagementProvider {
 								.append("&rol=").append(rol.toString())
 								.toString();
 		// @formatter:on
-		restTemplate.getForEntity(path, Boolean.class).getBody();
+		try {
+			restTemplate.getForEntity(path, Void.class).getBody();
+		} catch (Exception e) {
+			throw new UnauthorizedPurchaseException(ERROR_USER_CANT_BE_AUTHORIZATED);
+		}
 	}
 
 	@Override

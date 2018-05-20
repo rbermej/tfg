@@ -19,6 +19,7 @@ import uoc.tfg.raulberme.usermanagement.entity.UserStatusType;
 import uoc.tfg.raulberme.usermanagement.exception.EntityNotFoundUserManagementException;
 import uoc.tfg.raulberme.usermanagement.exception.UnauthorizedUserManagementException;
 import uoc.tfg.raulberme.usermanagement.form.AdminLoginForm;
+import uoc.tfg.raulberme.usermanagement.form.RegisteredUserUpdateForm;
 import uoc.tfg.raulberme.usermanagement.form.UserLoginForm;
 import uoc.tfg.raulberme.usermanagement.repository.AdminRepository;
 import uoc.tfg.raulberme.usermanagement.repository.RegisteredUserRepository;
@@ -29,7 +30,15 @@ import uoc.tfg.raulberme.usermanagement.service.UserManagementService;
 @Service
 public class UserManagementServiceImpl implements UserManagementService {
 
+	private static final String ERROR_USER_CANT_BE_AUTHORIZATE = "ERROR: user can't be authorizate.";
+	private static final String ERROR_USER_NOT_FOUND = "ERROR: user not found.";
+	private static final String ERROR_ADMIN_NOT_FOUND = "ERROR: admin not found.";
+	private static final String ERROR_INCORRECT_PASSWORD = "ERROR: incorrect password.";
+	private static final String ERROR_TOKEN_NOT_FOUND = "ERROR: token not found.";
+	private static final String ERROR_DUPLICATED_EMAIL = "ERROR: duplicated email.";
+	private static final String ERROR_DUPLICATED_USERNAME = "ERROR: duplicated username.";
 	private static final int LENGTH_TOKEN = 50;
+
 	private final UserRepository userRepository;
 	private final AdminRepository adminRepository;
 	private final RegisteredUserRepository registeredUserRepository;
@@ -47,28 +56,35 @@ public class UserManagementServiceImpl implements UserManagementService {
 	@Override
 	public Collection<RegisteredUserDTO> listUsers(final String tokenId) {
 		comproveAuthorization(tokenId, RolUserType.ADMIN);
-		return registeredUserRepository.findAll().stream().map(user -> convertToDTO(user)).collect(Collectors.toList());
+		return registeredUserRepository.findAll().stream().map(this::convertToDTO).collect(Collectors.toList());
 	}
 
 	@Override
 	public Collection<AdminDTO> listAdmins(final String tokenId) {
 		comproveAuthorization(tokenId, RolUserType.SUPERADMIN);
-		return adminRepository.findAll().stream().map(admin -> convertToDTO(admin)).collect(Collectors.toList());
+		return adminRepository.findAll().stream().map(this::convertToDTO).collect(Collectors.toList());
 	}
 
 	@Override
 	public void login(final UserLoginForm user) {
 		if (userRepository.existsByUsername(user.getUsername()))
-			throw new UnauthorizedUserManagementException("ERROR: duplicated username.");
+			throw new UnauthorizedUserManagementException(ERROR_DUPLICATED_USERNAME);
 
 		if (userRepository.existsByEmail(user.getEmail()))
-			throw new UnauthorizedUserManagementException("ERROR: duplicated email.");
+			throw new UnauthorizedUserManagementException(ERROR_DUPLICATED_EMAIL);
 
 		registeredUserRepository.save(convertToEntity(user));
 	}
 
 	@Override
-	public void login(final AdminLoginForm admin) {
+	public void login(final String tokenId, final AdminLoginForm admin) {
+		comproveAuthorization(tokenId, RolUserType.SUPERADMIN);
+		if (userRepository.existsByUsername(admin.getUsername()))
+			throw new UnauthorizedUserManagementException(ERROR_DUPLICATED_USERNAME);
+
+		if (userRepository.existsByEmail(admin.getEmail()))
+			throw new UnauthorizedUserManagementException(ERROR_DUPLICATED_EMAIL);
+
 		adminRepository.save(convertToEntity(admin));
 	}
 
@@ -98,65 +114,74 @@ public class UserManagementServiceImpl implements UserManagementService {
 					registeredUser.setStatus(UserStatusType.BLOQUED);
 					registeredUserRepository.save(registeredUser);
 					throw new UnauthorizedUserManagementException(
-							"ERROR: incorrect password. Your user has been bloqued.");
+							ERROR_INCORRECT_PASSWORD + " Your user has been bloqued.");
 				}
 				registeredUserRepository.save(registeredUser);
 				throw new UnauthorizedUserManagementException(
-						"ERROR: incorrect password. Number of available attempts: " + tries);
+						ERROR_INCORRECT_PASSWORD + " Number of available attempts: " + tries + ".");
 			}
-			throw new UnauthorizedUserManagementException("ERROR: incorrect password.");
+			throw new UnauthorizedUserManagementException(ERROR_INCORRECT_PASSWORD);
 		}
 
 		if (user instanceof RegisteredUser) {
 			((RegisteredUser) user).initiateTries();
 		}
 
-		String code = null;
-		do {
-			code = RandomString.make(LENGTH_TOKEN);
-		} while (tokenRepository.existsById(code));
-
+		final String code = generateTokenCode();
 		final Token token = createToken(code, user);
 		tokenRepository.save(token);
-		return token.getCode();
+		return code;
 	}
 
 	@Override
 	public void signout(final String tokenId) {
+		if (!tokenRepository.existsById(tokenId))
+			throw new UnauthorizedUserManagementException(ERROR_TOKEN_NOT_FOUND);
 		tokenRepository.deleteById(tokenId);
 	}
 
 	@Override
 	public void updatePassword(final String tokenId, final String oldPassword, final String newPassword) {
 		final User user = retrieveUserByToken(tokenId);
-		if (oldPassword.equals(user.getPassword())) {
-			user.setPassword(newPassword);
-			userRepository.save(user);
+		if (!oldPassword.equals(user.getPassword())) {
+			throw new UnauthorizedUserManagementException(ERROR_INCORRECT_PASSWORD);
 		}
+		user.setPassword(newPassword);
+		userRepository.save(user);
 	}
 
 	@Override
-	public void updateUser(final String tokenId, final String email, final String currencyId, final String password) {
+	public void updateUser(final String tokenId, final RegisteredUserUpdateForm userForm) {
+		comproveAuthorization(tokenId, RolUserType.REGISTERED_USER);
 		final RegisteredUser user = registeredUserRepository.getOne(retrieveUserByToken(tokenId).getId());
-		user.setEmail(email);
-		user.setDefaultCurrency(currencyId);
-		user.setPassword(password);
+		if (!user.getPassword().equals(userForm.getPassword())) {
+			throw new UnauthorizedUserManagementException(ERROR_INCORRECT_PASSWORD);
+		}
+		if (!user.getEmail().equals(userForm.getEmail()) && userRepository.existsByEmail(userForm.getEmail())) {
+			throw new UnauthorizedUserManagementException(ERROR_DUPLICATED_EMAIL);
+		}
+		user.setEmail(userForm.getEmail());
+		user.setDefaultCurrency(userForm.getDefaultCurrency());
 		registeredUserRepository.save(user);
 	}
 
 	@Override
 	public void deletedUser(final String tokenId, final String password) {
+		comproveAuthorization(tokenId, RolUserType.REGISTERED_USER);
 		final RegisteredUser user = registeredUserRepository.getOne(retrieveUserByToken(tokenId).getId());
-		if (password.equals(user.getPassword())) {
-			user.setStatus(UserStatusType.DEACTIVATED);
-			registeredUserRepository.save(user);
+		if (!password.equals(user.getPassword())) {
+			throw new UnauthorizedUserManagementException(ERROR_INCORRECT_PASSWORD);
 		}
+		user.setStatus(UserStatusType.DEACTIVATED);
+		registeredUserRepository.save(user);
 
 	}
 
 	@Override
 	public void deletedAdmin(final String tokenId, final Long id) {
 		comproveAuthorization(tokenId, RolUserType.SUPERADMIN);
+		if (!adminRepository.existsById(id))
+			throw new EntityNotFoundUserManagementException(ERROR_ADMIN_NOT_FOUND);
 		final Admin admin = adminRepository.getOne(id);
 		admin.setDeleted(true);
 		adminRepository.save(admin);
@@ -165,6 +190,8 @@ public class UserManagementServiceImpl implements UserManagementService {
 	@Override
 	public void lockUser(final String tokenId, final Long id) {
 		comproveAuthorization(tokenId, RolUserType.ADMIN);
+		if (!registeredUserRepository.existsById(id))
+			throw new EntityNotFoundUserManagementException(ERROR_USER_NOT_FOUND);
 		final RegisteredUser user = registeredUserRepository.getOne(id);
 		user.setStatus(UserStatusType.BLOQUED);
 		registeredUserRepository.save(user);
@@ -173,7 +200,7 @@ public class UserManagementServiceImpl implements UserManagementService {
 	@Override
 	public void comproveAuthorization(final String tokenId, final RolUserType rol) {
 		if (rol != retrieveUserByToken(tokenId).getRol())
-			throw new UnauthorizedUserManagementException("ERROR: user can't be authorizate.");
+			throw new UnauthorizedUserManagementException(ERROR_USER_CANT_BE_AUTHORIZATE);
 	}
 
 	@Override
@@ -181,10 +208,25 @@ public class UserManagementServiceImpl implements UserManagementService {
 		return retrieveUserByToken(tokenId).getUsername();
 	}
 
+	@Override
+	public boolean existsUserByUsername(final String tokenId, final String username) {
+		comproveAuthorization(tokenId, RolUserType.SYSTEM);
+		final RegisteredUser registeredUser = registeredUserRepository.findByUsername(username);
+		return registeredUser != null && registeredUser.getStatus() == UserStatusType.ACTIVATED;
+	}
+
+	private String generateTokenCode() {
+		String code;
+		do {
+			code = RandomString.make(LENGTH_TOKEN);
+		} while (tokenRepository.existsById(code));
+		return code;
+	}
+
 	private User retrieveUserByToken(final String tokenId) {
 		final Optional<Token> token = tokenRepository.findById(tokenId);
 		if (!token.isPresent())
-			throw new UnauthorizedUserManagementException("ERROR: token not found.");
+			throw new UnauthorizedUserManagementException(ERROR_TOKEN_NOT_FOUND);
 		return token.get().getUser();
 	}
 

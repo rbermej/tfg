@@ -15,4 +15,6 @@ public interface PurchaseRequestRepository extends JpaRepository<PurchaseRequest
 
 	public void deleteByAd(final Ad ad);
 
+	public boolean existsByAdAndApplicant(final Ad ad, final String applicant);
+
 }

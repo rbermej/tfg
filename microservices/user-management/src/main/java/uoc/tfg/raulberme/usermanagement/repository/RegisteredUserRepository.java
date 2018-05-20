@@ -6,6 +6,6 @@ import uoc.tfg.raulberme.usermanagement.entity.RegisteredUser;
 
 public interface RegisteredUserRepository extends JpaRepository<RegisteredUser, Long> {
 
-	// public RegisteredUser findByUser(final User user);
+	public RegisteredUser findByUsername(final String username);
 
 }

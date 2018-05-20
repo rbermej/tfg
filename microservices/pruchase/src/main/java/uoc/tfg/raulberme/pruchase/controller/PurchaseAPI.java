@@ -58,8 +58,8 @@ public class PurchaseAPI {
 
 	@ApiOperation(value = "Get an Ad", notes = "Get an ad by its id")
 	@GetMapping("/ads/{adId}")
-	public void getAd(@PathVariable final Long adId) {
-		service.getAd(adId);
+	public @ResponseBody AdDTO getAd(@PathVariable final Long adId) {
+		return service.retrieveAd(adId);
 	}
 
 	@ApiOperation(value = "Update an Ad", notes = "Update an ad")
@@ -75,7 +75,7 @@ public class PurchaseAPI {
 	}
 
 	@ApiOperation(value = "Buy an Ad", notes = "Buy an ad")
-	@PostMapping("/ads/{adId}/buy")
+	@PutMapping("/ads/{adId}/buy")
 	public void buyAd(@RequestParam final String tokenId, @PathVariable final Long adId) {
 		service.buyAd(tokenId, adId);
 	}
@@ -86,11 +86,24 @@ public class PurchaseAPI {
 		service.sellAd(tokenId, requestId);
 	}
 
-	@ApiOperation(value = "Get all request by Seller", notes = "Get all request by seller")
-	@GetMapping("/requests")
+	@ApiOperation(value = "Delete a Purchase Request", notes = "Delete a purchase request")
+	@DeleteMapping("/requests/{purchaseRequestId}")
+	public void removePurchaseRequest(@RequestParam final String tokenId, @PathVariable final Long purchaseRequestId) {
+		service.removePurchaseRequest(tokenId, purchaseRequestId);
+	}
+
+	@ApiOperation(value = "Get all Purchase Request by Seller", notes = "Get all purchase request by seller")
+	@GetMapping("/requests/seller")
 	public @ResponseBody Collection<PurchaseRequestDTO> listPurchaseRequestsBySeller(
 			@RequestParam final String tokenId) {
 		return service.listPurchaseRequestsBySeller(tokenId);
+	}
+
+	@ApiOperation(value = "Get all Purchase Request by Applicant", notes = "Get all purchase request by applicant")
+	@GetMapping("/requests/applicant")
+	public @ResponseBody Collection<PurchaseRequestDTO> listPurchaseRequestsByApplicant(
+			@RequestParam final String tokenId) {
+		return service.listPurchaseRequestsByApplicant(tokenId);
 	}
 
 }

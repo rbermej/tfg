@@ -33,38 +33,37 @@ public class CurrencyExchangeAPI {
 
 	@ApiOperation(value = "Get all Currencies", notes = "Returns all currencies")
 	@GetMapping("/currency")
-	@ResponseBody
-	public Collection<CurrencyDTO> listAllCurrencies() {
-		return service.listAllCurrencies();
+	public @ResponseBody Collection<CurrencyDTO> listAllCurrencies(@RequestParam final String tokenId) {
+		return service.listAllCurrencies(tokenId);
 	}
 
 	@ApiOperation(value = "Get today ratios with optional currency's base", notes = "Returns today ratios of a optional currency as base")
 	@GetMapping("ratio/today")
-	@ResponseBody
-	public ExchangeCurrencyDTO listRatiosByDay(@RequestParam final Optional<String> baseCurrencyId) {
-		return baseCurrencyId.isPresent() ? service.listRatiosByDay(baseCurrencyId.get(), LocalDate.now())
-				: service.listRatiosByDay(LocalDate.now());
+	public @ResponseBody ExchangeCurrencyDTO listRatiosByDay(@RequestParam final String tokenId,
+			@RequestParam final Optional<String> baseCurrencyId) {
+		return baseCurrencyId.isPresent() ? service.listRatiosByDay(tokenId, baseCurrencyId.get(), LocalDate.now())
+				: service.listRatiosByDay(tokenId, LocalDate.now());
 	}
 
 	@ApiOperation(value = "Get today ratios with optional currency's base of a day", notes = "Returns today ratios of a optional currency as base and day")
 	@GetMapping("ratio/{day}")
-	@ResponseBody
-	public ExchangeCurrencyDTO retrieveExchangeValue(@RequestParam final Optional<String> baseCurrencyId,
+	public @ResponseBody ExchangeCurrencyDTO retrieveExchangeValue(@RequestParam final String tokenId,
+			@RequestParam final Optional<String> baseCurrencyId,
 			@PathVariable @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) final LocalDate day) {
-		return baseCurrencyId.isPresent() ? service.listRatiosByDay(baseCurrencyId.get(), day)
-				: service.listRatiosByDay(day);
+		return baseCurrencyId.isPresent() ? service.listRatiosByDay(tokenId, baseCurrencyId.get(), day)
+				: service.listRatiosByDay(tokenId, day);
 	}
 
 	@ApiOperation(value = "Get today amount between two currencies and a quantity", notes = "Returns today amount between two given currencies and a quantity")
 	@GetMapping("ratio/today/amount")
-	public float calculateAmount(@RequestParam("from") final String baseCurrencyId,
+	public @ResponseBody float calculateAmount(@RequestParam("from") final String baseCurrencyId,
 			@RequestParam("to") final String destinationCurrencyId, @RequestParam("quantity") final Float quantity) {
 		return service.calculateAmount(baseCurrencyId, destinationCurrencyId, quantity, LocalDate.now());
 	}
 
 	@ApiOperation(value = "Get amount between two currencies and a quantity of a day", notes = "Returns amount between two given currencies, a quantity and a day")
 	@GetMapping("ratio/{day}/amount")
-	public float calculateAmount(@RequestParam("from") final String baseCurrencyId,
+	public @ResponseBody float calculateAmount(@RequestParam("from") final String baseCurrencyId,
 			@RequestParam("to") final String destinationCurrencyId, @RequestParam("quantity") final Float quantity,
 			@PathVariable @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) final LocalDate day) {
 		return service.calculateAmount(baseCurrencyId, destinationCurrencyId, quantity, day);

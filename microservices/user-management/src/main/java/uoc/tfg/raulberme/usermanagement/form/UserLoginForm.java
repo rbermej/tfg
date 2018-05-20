@@ -10,9 +10,11 @@ import lombok.Data;
 public class UserLoginForm {
 
 	@Size(min = 6, max = 30)
+	@NotNull
 	private String username;
 
 	@Email(message = "Email should be valid")
+	@NotNull
 	private String email;
 
 	@NotNull
