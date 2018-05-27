@@ -5,6 +5,7 @@ import java.util.Collection;
 import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -24,6 +25,7 @@ import uoc.tfg.raulberme.communication.form.ValuationForm;
 import uoc.tfg.raulberme.communication.service.CommunicationService;
 
 @RestController
+@CrossOrigin
 @RequestMapping("/communication")
 @Api(value = "Communication", tags = { "Communication" })
 public class CommunicationAPI {

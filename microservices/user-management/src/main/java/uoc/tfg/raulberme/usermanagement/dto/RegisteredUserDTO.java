@@ -13,7 +13,7 @@ import uoc.tfg.raulberme.usermanagement.entity.UserStatusType;
 @ApiModel(value = "RegisteredUserDTO", description = "Complete data of a Rest RegisteredUser")
 @Data
 @Builder
-public class RegisteredUserDTO implements Serializable {
+public class RegisteredUserDTO implements Serializable, Comparable<RegisteredUserDTO> {
 
 	private static final long serialVersionUID = 1L;
 
@@ -29,8 +29,17 @@ public class RegisteredUserDTO implements Serializable {
 	@JsonProperty
 	private String email;
 
+	@ApiModelProperty(value = "The default currency's user")
+	@JsonProperty
+	private String defaultCurrency;
+
 	@ApiModelProperty(value = "The status of user")
 	@JsonProperty
 	private UserStatusType status;
+
+	@Override
+	public int compareTo(final RegisteredUserDTO other) {
+		return this.username.compareTo(other.getUsername());
+	}
 
 }

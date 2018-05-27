@@ -6,6 +6,7 @@ import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -20,6 +21,7 @@ import uoc.tfg.raulberme.currencyexchange.dto.ExchangeCurrencyDTO;
 import uoc.tfg.raulberme.currencyexchange.service.CurrencyExchangeService;
 
 @RestController
+@CrossOrigin
 @RequestMapping("/currency-exchange")
 @Api(value = "CurrencyExchange", tags = { "CurrencyExchange" })
 public class CurrencyExchangeAPI {
@@ -27,22 +29,20 @@ public class CurrencyExchangeAPI {
 	private final CurrencyExchangeService service;
 
 	@Autowired
-	public CurrencyExchangeAPI(CurrencyExchangeService service) {
+	public CurrencyExchangeAPI(final CurrencyExchangeService service) {
 		this.service = service;
 	}
 
 	@ApiOperation(value = "Get all Currencies", notes = "Returns all currencies")
 	@GetMapping("/currency")
-	public @ResponseBody Collection<CurrencyDTO> listAllCurrencies(@RequestParam final String tokenId) {
-		return service.listAllCurrencies(tokenId);
+	public @ResponseBody Collection<CurrencyDTO> listAllCurrencies() {
+		return service.listAllCurrencies();
 	}
 
-	@ApiOperation(value = "Get today ratios with optional currency's base", notes = "Returns today ratios of a optional currency as base")
-	@GetMapping("ratio/today")
-	public @ResponseBody ExchangeCurrencyDTO listRatiosByDay(@RequestParam final String tokenId,
-			@RequestParam final Optional<String> baseCurrencyId) {
-		return baseCurrencyId.isPresent() ? service.listRatiosByDay(tokenId, baseCurrencyId.get(), LocalDate.now())
-				: service.listRatiosByDay(tokenId, LocalDate.now());
+	@ApiOperation(value = "Exists Currency by code", notes = "Exists currency by code (id)")
+	@GetMapping("/currency/exists")
+	public @ResponseBody boolean existsCurrency(@RequestParam final String currency) {
+		return service.existsCurrency(currency);
 	}
 
 	@ApiOperation(value = "Get today ratios with optional currency's base of a day", notes = "Returns today ratios of a optional currency as base and day")
@@ -54,14 +54,7 @@ public class CurrencyExchangeAPI {
 				: service.listRatiosByDay(tokenId, day);
 	}
 
-	@ApiOperation(value = "Get today amount between two currencies and a quantity", notes = "Returns today amount between two given currencies and a quantity")
-	@GetMapping("ratio/today/amount")
-	public @ResponseBody float calculateAmount(@RequestParam("from") final String baseCurrencyId,
-			@RequestParam("to") final String destinationCurrencyId, @RequestParam("quantity") final Float quantity) {
-		return service.calculateAmount(baseCurrencyId, destinationCurrencyId, quantity, LocalDate.now());
-	}
-
-	@ApiOperation(value = "Get amount between two currencies and a quantity of a day", notes = "Returns amount between two given currencies, a quantity and a day")
+	@ApiOperation(value = "Get amount between two currencies, a quantity and day", notes = "Returns amount between two given currencies, a quantity and day")
 	@GetMapping("ratio/{day}/amount")
 	public @ResponseBody float calculateAmount(@RequestParam("from") final String baseCurrencyId,
 			@RequestParam("to") final String destinationCurrencyId, @RequestParam("quantity") final Float quantity,

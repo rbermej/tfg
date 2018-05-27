@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <link rel="stylesheet" type="text/css" href="resources/bootstrap.min.css">
+    <link rel="stylesheet" type="text/css" href="main.css">
+    <link rel="stylesheet" type="text/css" href="fontawesome-free-5.0.13/web-fonts-with-css/css/fontawesome-all.css">
+
+    <script src="resources/jquery.min.js"></script>
+    <script src="resources/popper.min.js"></script>
+    <script src="resources/bootstrap.min.js"></script>
+    <script src="ajax/all.js"></script>
+    <script src="main.js" defer></script>
+
+    <title>App purchase currency exchange</title>
+</head>
+
+<body>
+    <div id="menu"></div>
+    <div class="container py-5">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="row">
+                    <div class="col-md-6 mx-auto">
+                        <div class="card rounded-0">
+                            <div class="card-header">
+                                <h2 class="mb-0">Deactivate your account</h2>
+                            </div>
+                            <div class="card-body">
+                                <div id="alert"></div>
+                                <div>
+                                    <p class="custom-control-description small text-dark">Enter the password and confirm if you want to deactivate your account.</p>
+                                </div>
+                                <form class="form" role="form" id="formDeactivateAccount">
+                                    <div class="form-group">
+                                        <label for="password">Password</label>
+                                        <input type="password" class="form-control form-control-lg rounded-0" name="password" id="password" required>
+                                    </div>
+                                    <button id="btnDeactivateAccount" class="btn btn-success btn-lg float-right">Accept</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</body>
+
+</html>

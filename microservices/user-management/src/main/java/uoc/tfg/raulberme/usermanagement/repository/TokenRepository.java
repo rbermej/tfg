@@ -9,4 +9,6 @@ public interface TokenRepository extends JpaRepository<Token, String> {
 
 	public boolean existsByUser(final User user);
 
+	public Token findByUser(final User user);
+
 }

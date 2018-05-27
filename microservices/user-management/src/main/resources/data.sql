@@ -15,19 +15,19 @@ insert into "USER" (id, rol, username, email, password) values
 	
 --INSERT ADMIN--
 insert into admin (id, deleted) values
-	(2, true),
-	(3, false),
+	(3, true),
 	(4, false),
-	(5, false);
+	(5, false),
+	(6, false);
 
 --INSERT REGISTERED_USER--
 insert into registered_user (id, status, tries, default_currency) values
-	(6,		0, 3, 'EUR'),
-	(7, 	1, 0, 'EUR'),
-	(8, 	2, 3, 'EUR'),
-	(9, 	0, 2, 'JPY'),
-	(10, 	0, 1, 'USD'),
-	(11, 	0, 3, 'GBP');
+	(7,		0, 3, 'EUR'),
+	(8, 	1, 0, 'EUR'),
+	(9, 	2, 3, 'EUR'),
+	(10, 	0, 2, 'JPY'),
+	(11, 	0, 1, 'USD'),
+	(12, 	0, 3, 'GBP');
 	
 --INSERT TOKEN--
 insert into token (user_id, code) values

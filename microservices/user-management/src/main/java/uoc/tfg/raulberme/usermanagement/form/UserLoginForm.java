@@ -20,7 +20,6 @@ public class UserLoginForm {
 	@NotNull
 	private String password;
 
-	@NotNull
 	private String defaultCurrency;
 
 }

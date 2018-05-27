@@ -26,7 +26,7 @@ public class RegisteredUser extends User {
 	@Column(nullable = false)
 	private byte tries;
 
-	@Column(nullable = false)
+	@Column
 	private String defaultCurrency;
 
 	@Builder

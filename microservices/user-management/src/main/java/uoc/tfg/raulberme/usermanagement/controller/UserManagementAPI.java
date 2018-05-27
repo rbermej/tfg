@@ -5,6 +5,7 @@ import java.util.Collection;
 import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -20,6 +21,7 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import uoc.tfg.raulberme.usermanagement.dto.AdminDTO;
 import uoc.tfg.raulberme.usermanagement.dto.RegisteredUserDTO;
+import uoc.tfg.raulberme.usermanagement.dto.SigninDTO;
 import uoc.tfg.raulberme.usermanagement.entity.RolUserType;
 import uoc.tfg.raulberme.usermanagement.form.AdminLoginForm;
 import uoc.tfg.raulberme.usermanagement.form.RegisteredUserUpdateForm;
@@ -27,6 +29,7 @@ import uoc.tfg.raulberme.usermanagement.form.UserLoginForm;
 import uoc.tfg.raulberme.usermanagement.service.UserManagementService;
 
 @RestController
+@CrossOrigin
 @RequestMapping("/user-management")
 @Api(value = "UserManagement", tags = { "UserManagement" })
 public class UserManagementAPI {
@@ -58,13 +61,13 @@ public class UserManagementAPI {
 
 	@ApiOperation(value = "Login admin", notes = "Login admin")
 	@PutMapping("/admins")
-	public void login(@PathVariable final String tokenId, @Valid @RequestBody final AdminLoginForm admin) {
+	public void login(@RequestParam final String tokenId, @Valid @RequestBody final AdminLoginForm admin) {
 		service.login(tokenId, admin);
 	}
 
 	@ApiOperation(value = "Signin user", notes = "Signin user (registered user, admin or superadmin)")
 	@GetMapping("/signin")
-	public @ResponseBody String signin(@RequestParam final String username, @RequestParam final String password) {
+	public @ResponseBody SigninDTO signin(@RequestParam final String username, @RequestParam final String password) {
 		return service.signin(username, password);
 	}
 
@@ -72,6 +75,12 @@ public class UserManagementAPI {
 	@PostMapping("/signout")
 	public void signout(@RequestParam final String tokenId) {
 		service.signout(tokenId);
+	}
+
+	@ApiOperation(value = "Get RegisteredUser", notes = "Return registered user")
+	@GetMapping("/users/{tokenId}")
+	public @ResponseBody RegisteredUserDTO getUser(@PathVariable final String tokenId) {
+		return service.getUser(tokenId);
 	}
 
 	@ApiOperation(value = "Update password", notes = "Update the old password with the new password")
@@ -109,12 +118,6 @@ public class UserManagementAPI {
 	@GetMapping("/authorizations")
 	public void comproveAuthorization(@RequestParam final String tokenId, @RequestParam final RolUserType rol) {
 		service.comproveAuthorization(tokenId, rol);
-	}
-
-	@ApiOperation(value = "Get user's username by token", notes = "Returns user's username by token")
-	@GetMapping("/users/{tokenId}")
-	public @ResponseBody String getUsernameByToken(@PathVariable final String tokenId) {
-		return service.getUsernameByToken(tokenId);
 	}
 
 	@ApiOperation(value = "Exists User by username", notes = "Exists user by username")

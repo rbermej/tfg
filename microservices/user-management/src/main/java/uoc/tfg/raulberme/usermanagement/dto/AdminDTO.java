@@ -12,7 +12,7 @@ import lombok.Data;
 @ApiModel(value = "AdminDTO", description = "Complete data of a Rest Admin")
 @Data
 @Builder
-public class AdminDTO implements Serializable {
+public class AdminDTO implements Serializable, Comparable<AdminDTO> {
 
 	private static final long serialVersionUID = 1L;
 
@@ -31,5 +31,10 @@ public class AdminDTO implements Serializable {
 	@ApiModelProperty(value = "The status of admin")
 	@JsonProperty
 	private boolean deleted;
+
+	@Override
+	public int compareTo(final AdminDTO other) {
+		return this.username.compareTo(other.getUsername());
+	}
 
 }

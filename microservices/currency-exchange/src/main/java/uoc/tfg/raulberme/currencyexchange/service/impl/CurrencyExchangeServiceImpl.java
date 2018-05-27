@@ -50,9 +50,13 @@ public class CurrencyExchangeServiceImpl implements CurrencyExchangeService {
 	}
 
 	@Override
-	public Collection<CurrencyDTO> listAllCurrencies(final String tokenId) {
-		userManagementProvider.comproveAuthorization(tokenId, RolUserType.REGISTERED_USER);
+	public Collection<CurrencyDTO> listAllCurrencies() {
 		return currencyRepository.findAll().stream().map(this::convertToDto).collect(Collectors.toList());
+	}
+
+	@Override
+	public boolean existsCurrency(final String currency) {
+		return currencyRepository.existsById(currency);
 	}
 
 	@Override
@@ -120,7 +124,7 @@ public class CurrencyExchangeServiceImpl implements CurrencyExchangeService {
 
 	private void findAndSaveExternalRatios(final LocalDate day) {
 		log.info(RATIO_NOT_FOUND_ACCESSING_EXTERNAL_PROVIDER);
-		Collection<Currency> currencies = currencyRepository.findAll();
+		final Collection<Currency> currencies = currencyRepository.findAll();
 		final Map<String, Float> mapExternalRatios = ratioProvider.findByDay(day);
 		final Collection<Ratio> listExternalRatios = new ArrayList<>();
 		mapExternalRatios.forEach((k, v) -> listExternalRatios

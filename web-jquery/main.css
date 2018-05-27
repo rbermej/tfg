@@ -1,0 +1,19 @@
+.hide{
+    display: none;
+}
+
+td.actions{
+    text-align: center;
+}
+
+th.actions{
+    width: 0em;
+}
+
+caption{
+    caption-side: top;
+}
+
+i.fas.fa-ban{
+    color: red;
+}

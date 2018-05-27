@@ -8,7 +8,9 @@ import uoc.tfg.raulberme.currencyexchange.dto.ExchangeCurrencyDTO;
 
 public interface CurrencyExchangeService {
 
-	public Collection<CurrencyDTO> listAllCurrencies(final String tokenId);
+	public Collection<CurrencyDTO> listAllCurrencies();
+
+	public boolean existsCurrency(final String currency);
 
 	public ExchangeCurrencyDTO listRatiosByDay(final String tokenId, final LocalDate day);
 
