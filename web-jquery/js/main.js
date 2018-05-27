@@ -1,5 +1,15 @@
 // TODO Extraer a otro documento INICIO
 
+function getToday() {
+    var today = new Date();
+    var dd = today.getDate();
+    var mm = today.getMonth() + 1; //January is 0!
+    var yyyy = today.getFullYear();
+    if (dd < 10) dd = '0' + dd;
+    if (mm < 10) mm = "0" + mm;
+    return yyyy + '-' + mm + '-' + dd;
+}
+
 function getLocalToken() {
     return localStorage.getItem('token');
 }
@@ -32,13 +42,13 @@ function showError(response) {
 function getUrlMenu() {
     switch (getLocalRol()) {
         case 'REGISTERED_USER':
-            return 'menu-registered-user.html';
+            return 'menus/menu-registered-user.html';
         case 'ADMIN':
-            return 'menu-admin.html';
+            return 'menus/menu-admin.html';
         case 'SUPERADMIN':
-            return 'menu-superadmin.html';
+            return 'menus/menu-superadmin.html';
         default:
-            return 'menu-user.html';
+            return 'menus/menu-user.html';
     }
 }
 
@@ -79,16 +89,16 @@ $(document).ready(function () {
     }
 
     //Load currency list (if exist currency id)
-    if ($('#currencies').length) {
+    if ($('#login-user').length || $('#update-user').length || $('#historical-ratios').length || $('#calculate-price').length) {
         getCurrency()
             .done(function (currencies) {
                 $.each(currencies, function (key, currency) {
-                    $("#currencies").append('<option value=' + currency.isoCode + '>' + currency.name + '</option>');
+                    $(".currencies").append('<option value=' + currency.isoCode + '>' + currency.name + '</option>');
                 });
-                $("#currencies").parent().show();
+                $(".currencies").parent().show();
             })
             .fail(function (jqXHR) {
-                $("#currencies").parent().hide();
+                $(".currencies").parent().hide();
             });
     }
 
@@ -291,5 +301,49 @@ $(document).ready(function () {
                 showError(jqXHR.responseJSON);
             });
     }
+
+    //Load deafult day (today)
+    if ($('#day').length) {
+        var today = getToday();
+        document.getElementById("day").max = today;
+        $('#day').val(today);
+    }
+
+    //Get Ratios
+    $('#formHistoricalRatios')
+        .submit(function (e) {
+            e.preventDefault();
+            var currency = $('#currencies').val();
+            var day = $('#day').val();
+            getRatioByDay(getLocalToken(), currency, day)
+                .done(function (ratio) {
+                    var st = ratio.baseCurrency.currency.isoCode + ' ' + ratio.baseCurrency.value;
+                    $.each(ratio.destinationCurrencies, function (key, currency) {
+                        st += '<br>' + currency.currency.isoCode + ' ' + currency.value;
+                    });
+                    $('#alert').html('<div class="alert alert-primary" role="alert">' + st + '</div>');
+                })
+                .fail(function (jqXHR) {
+                    showError(jqXHR.responseJSON);
+                });
+        });
+
+    //Calculate price
+    $('#formCalculatePrice')
+        .submit(function (e) {
+            e.preventDefault();
+            var from = $('#from').val();
+            var to = $('#to').val();
+            var quantity = $('#quantity').val();
+            var day = $('#day').val();
+            calculatePrice(from, to, quantity, day)
+                .done(function (amount) {
+                    var st = quantity + ' ' + from + ' = ' + amount + ' ' + to;
+                    $('#alert').html('<div class="alert alert-primary" role="alert">' + st + '</div>');
+                })
+                .fail(function (jqXHR) {
+                    showError(jqXHR.responseJSON);
+                });
+        });
 
 });

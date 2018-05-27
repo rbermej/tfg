@@ -20,26 +20,29 @@
 
 <body>
     <div id="menu"></div>
-    <div class="container py-5">
+    <div id="historical-ratios" class="container py-5">
         <div class="row">
             <div class="col-md-12">
                 <div class="row">
                     <div class="col-md-6 mx-auto">
                         <div class="card rounded-0">
                             <div class="card-header">
-                                <h2 class="mb-0">Deactivate your account</h2>
+                                <h2 class="mb-0">Historical ratios</h2>
                             </div>
                             <div class="card-body">
                                 <div id="alert"></div>
-                                <div>
-                                    <p class="custom-control-description small text-dark">Enter the password and confirm if you want to deactivate your account.</p>
-                                </div>
-                                <form class="form" role="form" id="formDeactivateAccount">
+                                <form class="form" role="form" id="formHistoricalRatios">
                                     <div class="form-group">
-                                        <label for="password">Password</label>
-                                        <input type="password" class="form-control form-control-lg rounded-0" name="password" id="password" required>
+                                        <label for="day">Day</label>
+                                        <input type="date" class="form-control form-control-lg rounded-0" name="day" id="day" required>
                                     </div>
-                                    <button id="btnDeactivateAccount" class="btn btn-success btn-lg float-right">Accept</button>
+                                    <div class="form-group">
+                                        <label for="currencies">Base currency</label>
+                                        <select class="form-control form-control-lg rounded-0 currencies" name="currencies" id="currencies" required>
+                                            <option value="">NONE</option>
+                                        </select>
+                                    </div>
+                                    <button id="btnHistoricalRatios" class="btn btn-success btn-lg float-right">Calculate</button>
                                 </form>
                             </div>
                         </div>

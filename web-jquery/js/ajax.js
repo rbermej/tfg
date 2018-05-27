@@ -117,34 +117,22 @@ function updatePassword(token, oldPassword, newPassword) {
 function getCurrency() {
     return $.ajax({
         url: 'http://localhost:8082/currency-exchange/currency',
-        method: "GET",
+        method: "GET"
     })
 }
 
 function getRatioByDay(token, currency, day) {
     return $.ajax({
         url: 'http://localhost:8082/currency-exchange/ratio/' + day + '?tokenId=' + token + '&baseCurrencyId=' + currency,
-        method: "GET",
+        method: "GET"
     })
-        .done(function (data) {
-            console.info(data);
-        })
-        .fail(function (jqXHR) {
-            showError(jqXHR.responseJSON.message);
-        });
 }
 
-function getAmountToday(from, to, quantity, day) {
+function calculatePrice(from, to, quantity, day) {
     return $.ajax({
         url: 'http://localhost:8082/currency-exchange/ratio/' + day + '/amount?from=' + from + '&to=' + to + '&quantity=' + quantity,
-        method: "GET",
+        method: "GET"
     })
-        .done(function (data) {
-            console.info(data);
-        })
-        .fail(function (jqXHR) {
-            showError(jqXHR.responseJSON.message);
-        });
 }
 
 /**
