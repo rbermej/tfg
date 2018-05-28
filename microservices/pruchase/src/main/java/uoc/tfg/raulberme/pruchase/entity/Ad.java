@@ -1,6 +1,7 @@
 package uoc.tfg.raulberme.pruchase.entity;
 
 import java.time.LocalDateTime;
+import java.util.Collection;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -9,6 +10,7 @@ import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 
 import lombok.AllArgsConstructor;
@@ -54,6 +56,9 @@ public class Ad {
 
 	@OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL, mappedBy = "ad")
 	private Sale sale;
+
+	@OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, mappedBy = "ad")
+	private Collection<PurchaseRequest> purchaseRequests;
 
 	@Builder
 	public Ad(final Float offeredAmount, final String offeredCurrency, final Float demandedAmount,

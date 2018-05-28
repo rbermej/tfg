@@ -3,7 +3,7 @@
 function getToday() {
     var today = new Date();
     var dd = today.getDate();
-    var mm = today.getMonth() + 1; //January is 0!
+    var mm = today.getMonth() + 1;
     var yyyy = today.getFullYear();
     if (dd < 10) dd = '0' + dd;
     if (mm < 10) mm = "0" + mm;
@@ -65,6 +65,59 @@ function getUrlHome() {
     }
 }
 
+function getHTMLCurrencySign(isoCode) {
+    var sign = function () {
+        switch (isoCode) {
+            case 'EUR': return 'euro';
+            case 'GBP': return 'pund';
+            case 'JPY': return 'yen';
+            case 'USD': return 'dollar';
+        }
+    }
+    return '<i class="fas fa-' + sign() + '-sign fa-3x"></i>';
+}
+
+function getHTMLAd(ad) {
+    var st = '<div class="col-md-3 mx-auto py-3"><div class="card"><div class="card-header text-center">';
+    st += getHTMLCurrencySign(ad.offeredCurrency) + '&nbsp;<i class="fas fa-arrow-right fa-3x"></i>&nbsp;' + getHTMLCurrencySign(ad.demandedCurrency) + '</div>';
+    st += '<div class="card-body text-center"><p>' + ad.offeredAmount + ' ' + ad.offeredCurrency + '</p>'
+    st += '<p><i class="fas fa-map-marker"></i>&nbsp;' + ad.location + '</p>'
+    st += '<p>Seller:&nbsp;<a href="list-valuations.html?user=' + ad.seller + '">' + ad.seller + '</a></p>'
+    st += '<p>' + ad.demandedAmount + ' ' + ad.demandedCurrency + '&nbsp;<a class="btn btn-success btn-sm btnBuyAd" role="button" href="' + ad.id + '">Buy</a></p></div></div></div>';
+    return st;
+}
+
+function loadAds(ads) {
+    $('#cardsListAds').empty();
+    $.each(ads, function (key, ad) {
+        $('#cardsListAds').append(getHTMLAd(ad));
+    });
+    $('.btnBuyAd')
+        .click(function (e) {
+            e.preventDefault();
+            createPurchaseRequest(getLocalToken(), $(this).attr('href'))
+                .done(function () {
+                    alert('Purchase request created.');
+                })
+                .fail(function (jqXHR) {
+                    showError(jqXHR.responseJSON);
+                })
+        });
+}
+
+function getUrlParameter(sParam) {
+    var sPageURL = decodeURIComponent(window.location.search.substring(1)),
+        sURLVariables = sPageURL.split('&'),
+        sParameterName,
+        i;
+    for (i = 0; i < sURLVariables.length; i++) {
+        sParameterName = sURLVariables[i].split('=');
+        if (sParameterName[0] === sParam) {
+            return sParameterName[1] === undefined ? true : sParameterName[1];
+        }
+    }
+}
+
 // TODO Extraer a otro documento FIN
 $(document).ready(function () {
 
@@ -89,7 +142,8 @@ $(document).ready(function () {
     }
 
     //Load currency list (if exist currency id)
-    if ($('#login-user').length || $('#update-user').length || $('#historical-ratios').length || $('#calculate-price').length) {
+    if ($('#login-user').length || $('#update-user').length || $('#historical-ratios').length ||
+        $('#calculate-price').length || $('#list-ads').length || $('#form-ad').length) {
         getCurrency()
             .done(function (currencies) {
                 $.each(currencies, function (key, currency) {
@@ -118,7 +172,7 @@ $(document).ready(function () {
                 })
                 .fail(function (jqXHR) {
                     showError(jqXHR.responseJSON);
-                });;
+                });
 
         });
 
@@ -145,7 +199,7 @@ $(document).ready(function () {
                     })
                     .fail(function (jqXHR) {
                         showError(jqXHR.responseJSON);
-                    });;
+                    });
             }
         });
 
@@ -345,5 +399,203 @@ $(document).ready(function () {
                     showError(jqXHR.responseJSON);
                 });
         });
+
+    //Load ads list (if exist ads list)
+    if ($('#list-ads').length) {
+        getAds()
+            .done(function (ads) {
+                loadAds(ads);
+            })
+            .fail(function (jqXHR) {
+                showError(jqXHR.responseJSON);
+            });
+    }
+
+    //Filter ads list
+    $('#formListAds')
+        .submit(function (e) {
+            e.preventDefault();
+            var from = $('#from').val() != '' ? $('#from').val() : undefined;
+            var to = $('#to').val() != '' ? $('#to').val() : undefined;
+            getAds(from, to)
+                .done(function (ads) {
+                    loadAds(ads);
+                })
+                .fail(function (jqXHR) {
+                    showError(jqXHR.responseJSON);
+                });
+        });
+
+    //Calculate amount on form-ad
+    if ($('#form-ad').length) {
+        $(".required")
+            .on("change", function () {
+                var from = $('#from').val();
+                var to = $('#to').val();
+                var quantity = $('#quantity').val();
+                var day = getToday();
+                if (from != '' && to != '' && quantity != '') {
+                    //Calculate Amount
+                    calculatePrice(from, to, quantity, day)
+                        .done(function (amount) {
+                            $('#amount').val(amount);
+                        })
+                        .fail(function (jqXHR) {
+                            $('#amount').val('');
+                        });
+                }
+                else {
+                    $('#amount').val('');
+                }
+            });
+    }
+
+    if ($('#form-ad').length) {
+        var adId = getUrlParameter('adId');
+        if (adId !== undefined) {
+            $('h2').text('Update ad');
+            //Load Ad
+            getAd(adId)
+                .done(function (ad) {
+                    $('#pk').val(ad.id);
+                    $('#from').val(ad.offeredCurrency);
+                    $('#quantity').val(ad.offeredAmount);
+                    $('#to').val(ad.demandedCurrency);
+                    $('#amount').val(ad.demandedAmount);
+                    $('#location').val(ad.location);
+                })
+                .fail(function (jqXHR) {
+                    showError(jqXHR.responseJSON);
+                });
+        }
+        else
+            $('h2').text('Create ad');
+        //Save Ad
+        $('#formAd')
+            .submit(function (e) {
+                e.preventDefault();
+                var ad = {
+                    id: $('#pk').val(),
+                    offeredCurrency: $('#from').val(),
+                    offeredAmount: $('#quantity').val(),
+                    demandedCurrency: $('#to').val(),
+                    location: $('#location').val()
+                }
+                if (ad.id === '') {
+                    //Create Ad
+                    createAd(getLocalToken(), ad)
+                        .done(function () {
+                            alert('Ad saved. Accept to go to panel seller page');
+                            $(location).attr('href', 'panel-seller.html');
+                        })
+                        .fail(function (jqXHR) {
+                            showError(jqXHR.responseJSON);
+                        });
+                }
+                else {
+                    //Update Ad
+                    updateAd(getLocalToken(), ad)
+                        .done(function () {
+                            alert('Ad saved. Accept to go to panel seller page');
+                            $(location).attr('href', 'panel-seller.html');
+                        })
+                        .fail(function (jqXHR) {
+                            showError(jqXHR.responseJSON);
+                        });
+                }
+            });
+    }
+
+    //Load ad list and purchase requests list as sellers (if exist panel seller)
+    if ($('#panel-seller').length) {
+        getAdsBySeller(getLocalToken())
+            .done(function (ads) {
+                $.each(ads, function (key, ad) {
+                    var a = ad.status == 'SOLD' ? '' : '<a class="btnUpdateAd" href="form-ad.html?adId=' + ad.id + '" role="button"><i class="fas fa-edit"></i></a>&nbsp;' +
+                        '&nbsp;<a class="btnDeleteAd" href="' + ad.id + '" role="button"><i class="fas fa-trash"></i></a>';
+                    var tr = '<tr><td>' + ad.offeredAmount + ' ' + ad.offeredCurrency + '</td>' +
+                        '<td>' + ad.demandedAmount + ' ' + ad.demandedCurrency + '</td>' +
+                        '<td>' + ad.seller + '</td><td>' + ad.location + '</td>' +
+                        '<td>' + ad.status + '</td><td>' + new Date(ad.date).toUTCString() + '</td>' +
+                        '<td class="actions">' + a + '</td></tr>';
+                    $('#tableAds tbody').append(tr);
+                });
+                //Delete ad
+                $('.btnDeleteAd')
+                    .click(function (e) {
+                        e.preventDefault();
+                        deleteAd(getLocalToken(), $(this).attr('href'))
+                            .done(function () {
+                                location.reload();
+                            })
+                            .fail(function (jqXHR) {
+                                showError(jqXHR.responseJSON);
+                            })
+                    });
+            })
+            .fail(function (jqXHR) {
+                showError(jqXHR.responseJSON);
+            });
+        getPurchaseRequestsAsSeller(getLocalToken())
+            .done(function (purchaseRequests) {
+                $.each(purchaseRequests, function (key, request) {
+                    var a = request.status == 'SOLD' ? '' : '<a class="btnSell" href="' + request.id + '" role="button"><i class="fas fa-check"></i></a>';
+                    var tr = '<tr><td>' + request.offeredAmount + ' ' + request.offeredCurrency + '</td>' +
+                        '<td>' + request.demandedAmount + ' ' + request.demandedCurrency + '</td>' +
+                        '<td>' + request.seller + '</td><td>' + request.location + '</td>' +
+                        '<td>' + new Date(request.date).toUTCString() + '</td>' +
+                        '<td class="actions">' + a + '</td></tr>';
+                    $('#tablePurchaseRequests tbody').append(tr);
+                });
+                //Sell Ad - Accept purchase request
+                $('.btnSell')
+                    .click(function (e) {
+                        e.preventDefault();
+                        sellAd(getLocalToken(), $(this).attr('href'))
+                            .done(function () {
+                                location.reload();
+                            })
+                            .fail(function (jqXHR) {
+                                showError(jqXHR.responseJSON);
+                            })
+                    });
+            })
+            .fail(function (jqXHR) {
+                showError(jqXHR.responseJSON);
+            });
+    }
+
+    //Load purchase requests as buyer (if exist panel buyer)
+    if ($('#panel-buyer').length) {
+        getPurchaseRequestsAsApplicant(getLocalToken())
+            .done(function (purchaseRequests) {
+                $.each(purchaseRequests, function (key, request) {
+                    var a = request.status == 'SOLD' ? '' : '<a class="btnDeletePurchaseRequest" href="' + request.id + '" role="button"><i class="fas fa-trash"></i></a>';
+                    var tr = '<tr><td>' + request.offeredAmount + ' ' + request.offeredCurrency + '</td>' +
+                        '<td>' + request.demandedAmount + ' ' + request.demandedCurrency + '</td>' +
+                        '<td>' + request.seller + '</td><td>' + request.location + '</td>' +
+                        '<td>' + request.status + '</td><td>' + new Date(request.date).toUTCString() + '</td>' +
+                        '<td class="actions">' + a + '</td></tr>';
+                    $('tbody').append(tr);
+                });
+                //Delete purchase request
+                $('.btnDeletePurchaseRequest')
+                    .click(function (e) {
+                        e.preventDefault();
+                        var button = $(this);
+                        var tr = button.closest('tr');
+                        deletePurchaseRequest(getLocalToken(), button.attr('href'))
+                            .done(function () {
+                                $(tr).remove();
+                            })
+                            .fail(function (jqXHR) {
+                                showError(jqXHR.responseJSON);
+                            })
+                    });
+            })
+            .fail(function (jqXHR) {
+                showError(jqXHR.responseJSON);
+            });
+    }
 
 });

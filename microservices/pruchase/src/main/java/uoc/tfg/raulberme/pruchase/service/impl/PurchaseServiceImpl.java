@@ -158,8 +158,8 @@ public class PurchaseServiceImpl implements PurchaseService {
 	public Collection<PurchaseRequestDTO> listPurchaseRequestsBySeller(final String tokenId) {
 		userManagementProvider.comproveAuthorization(tokenId, RolUserType.REGISTERED_USER);
 		final String seller = userManagementProvider.retrieveUsernameByToken(tokenId);
-		Collection<Ad> activedAds = adRepository.findBySellerAndStatus(seller, AdStatusType.ACTIVATED);
-		Collection<PurchaseRequest> purchaseRequests = new ArrayList<>();
+		final Collection<Ad> activedAds = adRepository.findBySellerAndStatus(seller, AdStatusType.ACTIVATED);
+		final Collection<PurchaseRequest> purchaseRequests = new ArrayList<>();
 		activedAds.forEach(ad -> purchaseRequests.addAll(purchaseRequestRepository.findByAd(ad)));
 		return purchaseRequests.stream().map(this::convertToDTO).sorted().collect(Collectors.toList());
 	}

@@ -149,13 +149,7 @@ function getAds(from, to) {
             from: from,
             to: to
         }
-    })
-        .done(function (data) {
-            console.info(data);
-        })
-        .fail(function (jqXHR) {
-            showError(jqXHR.responseJSON.message);
-        });
+    });
 }
 
 function updateAd(token, ad) {
@@ -164,13 +158,7 @@ function updateAd(token, ad) {
         method: "POST",
         contentType: 'application/json',
         data: JSON.stringify(ad)
-    })
-        .done(function (data) {
-            console.log(data);
-        })
-        .fail(function (jqXHR) {
-            showError(jqXHR.responseJSON.message);
-        });
+    });
 }
 
 function createAd(token, ad) {
@@ -179,119 +167,63 @@ function createAd(token, ad) {
         method: "PUT",
         contentType: 'application/json',
         data: JSON.stringify(ad)
-    })
-        .done(function (data) {
-            console.log(data);
-        })
-        .fail(function (jqXHR) {
-            showError(jqXHR.responseJSON.message);
-        });
+    });
 }
 
 function getAdsBySeller(token) {
     return $.ajax({
         url: 'http://localhost:8083/purchase/ads/seller?tokenId=' + token,
-        method: 'GET',
-    })
-        .done(function (data) {
-            console.info(data);
-        })
-        .fail(function (jqXHR) {
-            showError(jqXHR.responseJSON.message);
-        });
+        method: 'GET'
+    });
 }
 
 function deleteAd(token, adId) {
     return $.ajax({
         url: 'http://localhost:8083/purchase/ads/' + adId + '?tokenId=' + token,
-        method: 'DELETE',
-    })
-        .done(function (data) {
-            console.info(data);
-        })
-        .fail(function (jqXHR) {
-            showError(jqXHR.responseJSON.message);
-        });
+        method: 'DELETE'
+    });
 }
 
 function getAd(adId) {
     return $.ajax({
         url: 'http://localhost:8083/purchase/ads/' + adId,
-        method: "GET",
-    })
-        .done(function (data) {
-            console.info(data);
-        })
-        .fail(function (jqXHR) {
-            showError(jqXHR.responseJSON.message);
-        });
+        method: "GET"
+    });
 }
 
-function createPurchaseRequest(adId) {
+function createPurchaseRequest(token, adId) {
     return $.ajax({
         url: 'http://localhost:8083/purchase/ads/' + adId + '/buy?tokenId=' + token,
-        method: "PUT",
-    })
-        .done(function (data) {
-            console.info(data);
-        })
-        .fail(function (jqXHR) {
-            showError(jqXHR.responseJSON.message);
-        });
+        method: "PUT"
+    });
 }
 
 function getPurchaseRequestsAsApplicant(token) {
     return $.ajax({
-        url: 'http://localhost:8083/requests/applicant?tokenId=' + token,
-        method: "GET",
-    })
-        .done(function (data) {
-            console.info(data);
-        })
-        .fail(function (jqXHR) {
-            showError(jqXHR.responseJSON.message);
-        });
+        url: 'http://localhost:8083/purchase/requests/applicant?tokenId=' + token,
+        method: "GET"
+    });
 }
 
 function getPurchaseRequestsAsSeller(token) {
     return $.ajax({
-        url: 'http://localhost:8083/requests/seller?tokenId=' + token,
-        method: "GET",
-    })
-        .done(function (data) {
-            console.info(data);
-        })
-        .fail(function (jqXHR) {
-            showError(jqXHR.responseJSON.message);
-        });
+        url: 'http://localhost:8083/purchase/requests/seller?tokenId=' + token,
+        method: "GET"
+    });
 }
 
 function deletePurchaseRequest(token, purchaseRequestId) {
     return $.ajax({
         url: 'http://localhost:8083/purchase/requests/' + purchaseRequestId + '?tokenId=' + token,
-        method: 'DELETE',
-    })
-        .done(function (data) {
-            console.info(data);
-        })
-        .fail(function (jqXHR) {
-            showError(jqXHR.responseJSON.message);
-        });
+        method: 'DELETE'
+    });
 }
 
 function sellAd(token, requestId) {
     return $.ajax({
         url: 'http://localhost:8083/purchase/requests?tokenId=' + token + '&requestId=' + requestId,
-        method: "POST",
-        contentType: 'application/json',
-        data: JSON.stringify(ad)
-    })
-        .done(function (data) {
-            console.log(data);
-        })
-        .fail(function (jqXHR) {
-            showError(jqXHR.responseJSON.message);
-        });
+        method: "POST"
+    });
 }
 
 /**

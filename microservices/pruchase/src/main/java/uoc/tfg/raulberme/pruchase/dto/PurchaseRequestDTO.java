@@ -59,7 +59,7 @@ public class PurchaseRequestDTO implements Serializable, Comparable<PurchaseRequ
 	private LocalDateTime date;
 
 	@Override
-	public int compareTo(PurchaseRequestDTO other) {
+	public int compareTo(final PurchaseRequestDTO other) {
 		return other.getDate().compareTo(this.getDate());
 	}
 

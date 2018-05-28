@@ -1,5 +1,7 @@
 package uoc.tfg.raulberme.pruchase.provider.impl;
 
+import java.time.LocalDate;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
@@ -25,9 +27,10 @@ public class CurrencyExchangeLocalProvider implements CurrencyExchangeProvider {
 
 	@Override
 	public float calculateAmount(final String baseCurrency, final String destinationCurrency, final Float quantity) {
+		System.out.println(LocalDate.now());
 		// @formatter:off
 		final String path = new StringBuilder(RESOURCE_URL)
-								.append("ratio/today/amount")
+								.append("ratio/").append(LocalDate.now()).append("/amount")
 								.append("?from=").append(baseCurrency)
 								.append("&to=").append(destinationCurrency)
 								.append("&quantity=").append(quantity)
@@ -35,7 +38,7 @@ public class CurrencyExchangeLocalProvider implements CurrencyExchangeProvider {
 		// @formatter:on
 		try {
 			return restTemplate.getForEntity(path, Float.class).getBody();
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			if (e.getMessage().contains("404"))
 				throw new NotFoundPurchaseException(ERROR_CURRENCY_NOT_FOUND);
 			throw new NotFoundPurchaseException(ERROR_CURRENCY_EXCHANGE_NOT_FOUND);

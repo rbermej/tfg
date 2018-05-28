@@ -190,7 +190,6 @@ public class UserManagementServiceImpl implements UserManagementService {
 		}
 		user.setStatus(UserStatusType.DEACTIVATED);
 		registeredUserRepository.save(user);
-
 	}
 
 	@Override
