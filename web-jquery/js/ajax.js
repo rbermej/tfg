@@ -27,7 +27,7 @@ function deleteAdmin(token, adminId) {
     });
 }
 
-function isAuthorized(token, rol, result) {
+function isAuthorized(token, rol) {
     return $.ajax({
         url: 'http://localhost:8081/user-management/authorizations?tokenId=' + token + '&rol=' + rol,
         method: "GET"
@@ -221,7 +221,7 @@ function deletePurchaseRequest(token, purchaseRequestId) {
 
 function sellAd(token, requestId) {
     return $.ajax({
-        url: 'http://localhost:8083/purchase/requests?tokenId=' + token + '&requestId=' + requestId,
+        url: 'http://localhost:8083/purchase/requests/' + requestId + '/sell?tokenId=' + token,
         method: "POST"
     });
 }
@@ -235,68 +235,38 @@ function sellAd(token, requestId) {
 function getConversations(token) {
     return $.ajax({
         url: 'http://localhost:8084/communication/conversations?tokenId=' + token,
-        method: "GET",
-    })
-        .done(function (data) {
-            console.info(data);
-        })
-        .fail(function (jqXHR) {
-            showError(jqXHR.responseJSON.message);
-        });
+        method: "GET"
+    });
 }
 
-function getMessages(token, conversationId) {
+function getMessages(token, receiver) {
     return $.ajax({
-        url: 'http://localhost:8084/communication/messages?tokenId=' + token + '&conversationId=' + conversationId,
-        method: "GET",
-    })
-        .done(function (data) {
-            console.info(data);
-        })
-        .fail(function (jqXHR) {
-            showError(jqXHR.responseJSON.message);
-        });
+        url: 'http://localhost:8084/communication/messages?tokenId=' + token + '&receiver=' + receiver,
+        method: "GET"
+    });
 }
 
-function createMessage(message) {
+function createMessage(token, message) {
     return $.ajax({
         url: 'http://localhost:8084/communication/messages?tokenId=' + token,
         method: 'PUT',
         contentType: 'application/json',
         data: JSON.stringify(message)
-    })
-        .done(function (data) {
-            console.info(data);
-        })
-        .fail(function (jqXHR) {
-            showError(jqXHR.responseJSON.message);
-        });
+    });
 }
 
-function createValuation(valuation) {
+function createValuation(token, valuation) {
     return $.ajax({
-        url: 'http://localhost:8084/communication/valuations?tokenId=' + valuation,
+        url: 'http://localhost:8084/communication/valuations?tokenId=' + token,
         method: 'PUT',
         contentType: 'application/json',
-        data: JSON.stringify(message)
-    })
-        .done(function (data) {
-            console.info(data);
-        })
-        .fail(function (jqXHR) {
-            showError(jqXHR.responseJSON.message);
-        });
+        data: JSON.stringify(valuation)
+    });
 }
 
-function getMessages(token, evaluated) {
+function getValuationsByEvaluated(token, evaluated) {
     return $.ajax({
         url: 'http://localhost:8084/communication/valuations/' + evaluated + '?tokenId=' + token,
-        method: "GET",
-    })
-        .done(function (data) {
-            console.info(data);
-        })
-        .fail(function (jqXHR) {
-            showError(jqXHR.responseJSON.message);
-        });
+        method: "GET"
+    });
 }

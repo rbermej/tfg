@@ -81,10 +81,19 @@ function getHTMLAd(ad) {
     var st = '<div class="col-md-3 mx-auto py-3"><div class="card"><div class="card-header text-center">';
     st += getHTMLCurrencySign(ad.offeredCurrency) + '&nbsp;<i class="fas fa-arrow-right fa-3x"></i>&nbsp;' + getHTMLCurrencySign(ad.demandedCurrency) + '</div>';
     st += '<div class="card-body text-center"><p>' + ad.offeredAmount + ' ' + ad.offeredCurrency + '</p>'
-    st += '<p><i class="fas fa-map-marker"></i>&nbsp;' + ad.location + '</p>'
-    st += '<p>Seller:&nbsp;<a href="list-valuations.html?user=' + ad.seller + '">' + ad.seller + '</a></p>'
+    st += '<p><i class="fas fa-map-marker"></i>&nbsp;' + ad.location + '</p>';
+    st += '<p>Seller:&nbsp;<a href="list-valuations.html?user=' + ad.seller + '">' + ad.seller + '</a>&nbsp;';
+    st += '<a href="list-messages.html?receiver=' + ad.seller + '"><i class="far fa-comments"></i></a></p>';
     st += '<p>' + ad.demandedAmount + ' ' + ad.demandedCurrency + '&nbsp;<a class="btn btn-success btn-sm btnBuyAd" role="button" href="' + ad.id + '">Buy</a></p></div></div></div>';
     return st;
+}
+
+function getHTMLValuation(valuation) {
+    var author = getLocalUsername() == valuation.evaluator ? valuation.evaluator : '<a href="list-valuations.html?user=' + valuation.evaluator + '" role="button">' + valuation.evaluator + '</a>';
+    var message = valuation.text == null ? '' : '<div class="row"><div class="col messageContent py-1 text-justify">' + valuation.text + '</div></div>';
+    return '<div class="valuation container py-1 my-2 border rounded"><div class="row">' +
+        '<div class="col autor">' + author + '</div><div class="col date">' + new Date(valuation.date).toUTCString() + '</div></div>' +
+        '<div class="row"><div class="col py-1 text-justify">Points: ' + valuation.points + '</div></div>' + message + '</div>';
 }
 
 function loadAds(ads) {
@@ -226,7 +235,7 @@ $(document).ready(function () {
             });
         });
 
-    //Load currency list (if exist currency id)
+    //Load user (if exist form update user)
     if ($('#formUpdateUser').length) {
         getUser(getLocalToken())
             .done(function (user) {
@@ -511,13 +520,14 @@ $(document).ready(function () {
         getAdsBySeller(getLocalToken())
             .done(function (ads) {
                 $.each(ads, function (key, ad) {
-                    var a = ad.status == 'SOLD' ? '' : '<a class="btnUpdateAd" href="form-ad.html?adId=' + ad.id + '" role="button"><i class="fas fa-edit"></i></a>&nbsp;' +
+                    var tdActions = ad.status == 'SOLD' ? '' : '<a class="btnUpdateAd" href="form-ad.html?adId=' + ad.id + '" role="button"><i class="fas fa-edit"></i></a>&nbsp;' +
                         '&nbsp;<a class="btnDeleteAd" href="' + ad.id + '" role="button"><i class="fas fa-trash"></i></a>';
+                    var tdBuyer = ad.buyer === null ? '' : '<a href="list-valuations.html?user=' + ad.buyer + '" role="button">' + ad.buyer + '</a>';
                     var tr = '<tr><td>' + ad.offeredAmount + ' ' + ad.offeredCurrency + '</td>' +
                         '<td>' + ad.demandedAmount + ' ' + ad.demandedCurrency + '</td>' +
-                        '<td>' + ad.seller + '</td><td>' + ad.location + '</td>' +
+                        '<td>' + tdBuyer + '</td><td>' + ad.location + '</td>' +
                         '<td>' + ad.status + '</td><td>' + new Date(ad.date).toUTCString() + '</td>' +
-                        '<td class="actions">' + a + '</td></tr>';
+                        '<td class="actions">' + tdActions + '</td></tr>';
                     $('#tableAds tbody').append(tr);
                 });
                 //Delete ad
@@ -542,8 +552,8 @@ $(document).ready(function () {
                     var a = request.status == 'SOLD' ? '' : '<a class="btnSell" href="' + request.id + '" role="button"><i class="fas fa-check"></i></a>';
                     var tr = '<tr><td>' + request.offeredAmount + ' ' + request.offeredCurrency + '</td>' +
                         '<td>' + request.demandedAmount + ' ' + request.demandedCurrency + '</td>' +
-                        '<td>' + request.seller + '</td><td>' + request.location + '</td>' +
-                        '<td>' + new Date(request.date).toUTCString() + '</td>' +
+                        '<td><a href="list-valuations.html?user=' + request.buyer + '" role="button">' + request.buyer + '</a></td>' +
+                        '<td>' + request.location + '</td><td>' + new Date(request.date).toUTCString() + '</td>' +
                         '<td class="actions">' + a + '</td></tr>';
                     $('#tablePurchaseRequests tbody').append(tr);
                 });
@@ -573,8 +583,8 @@ $(document).ready(function () {
                     var a = request.status == 'SOLD' ? '' : '<a class="btnDeletePurchaseRequest" href="' + request.id + '" role="button"><i class="fas fa-trash"></i></a>';
                     var tr = '<tr><td>' + request.offeredAmount + ' ' + request.offeredCurrency + '</td>' +
                         '<td>' + request.demandedAmount + ' ' + request.demandedCurrency + '</td>' +
-                        '<td>' + request.seller + '</td><td>' + request.location + '</td>' +
-                        '<td>' + request.status + '</td><td>' + new Date(request.date).toUTCString() + '</td>' +
+                        '<td><a href="list-valuations.html?user=' + request.seller + '" role="button">' + request.seller + '</a></td>' +
+                        '<td>' + request.location + '</td><td>' + request.status + '</td><td>' + new Date(request.date).toUTCString() + '</td>' +
                         '<td class="actions">' + a + '</td></tr>';
                     $('tbody').append(tr);
                 });
@@ -595,6 +605,107 @@ $(document).ready(function () {
             })
             .fail(function (jqXHR) {
                 showError(jqXHR.responseJSON);
+            });
+    }
+
+    //Load conversations (if exist list conversations)
+    if ($('#list-conversations').length) {
+        getConversations(getLocalToken())
+            .done(function (conversations) {
+                $.each(conversations, function (key, conversation) {
+                    var user = getLocalUsername() != conversation.user1 ? conversation.user1 : conversation.user2;
+                    var tr = '<tr><td><a href="list-valuations.html?user=' + user + '" role="button">' + user + '</a></td>' +
+                        '<td class="col-num">' + conversation.numberMessages + '</td><td>' + new Date(conversation.date).toUTCString() + '</td>' +
+                        '<td class="actions"><a href="list-messages.html?receiver=' + user + '" role="button"><i class="fas fa-comments"></i></a></td></tr>';
+                    $('tbody').append(tr);
+                });
+            })
+            .fail(function (jqXHR) {
+                showError(jqXHR.responseJSON);
+            });
+    }
+
+    //Load messages (if exist list messages)
+    if ($('#list-messages').length) {
+        getMessages(getLocalToken(), getUrlParameter('receiver'))
+            .done(function (response) {
+                $('#conversationId').val(response.conversationId);
+                $.each(response.messages, function (key, message) {
+                    var author = getLocalUsername() == message.author ? message.author : '<a href="list-valuations.html?user=' + message.author + '" role="button">' + message.author + '</a>';
+                    var tr = '<div class="message container py-1 my-2 border rounded"><div class="row">' +
+                        '<div class="col autor">' + author + '</div><div class="col date">' + new Date(message.date).toUTCString() + '</div></div>' +
+                        '<div class="row"><div class="col messageContent py-3 text-justify">' + message.text + '</div></div></div>';
+                    $('#messages').append(tr);
+                });
+
+                //Send message
+                $('#formMessage')
+                    .submit(function (e) {
+                        e.preventDefault();
+                        var message = {
+                            conversationId: $('#conversationId').val(),
+                            text: $('#messageContent').val()
+                        }
+                        createMessage(getLocalToken(), message)
+                            .done(function () {
+                                location.reload(true);
+                            })
+                            .fail(function (jqXHR) {
+                                showError(jqXHR.responseJSON);
+                            });
+                    });
+            })
+            .fail(function (jqXHR) {
+                showError(jqXHR.responseJSON);
+                $('#formMessage').attr("disabled", true);
+            });
+    }
+
+    //Create valuation
+    $('#formValuation')
+        .submit(function (e) {
+            e.preventDefault();
+            var text = $('#messageContent').val() == '' ? null : $('#messageContent').val();
+            var valuation = {
+                evaluated: $('#evaluated').val(),
+                points: $('#points').val(),
+                rol: $('#rol').val(),
+                text: text
+            }
+            createValuation(getLocalToken(), valuation)
+                .done(function () {
+                    alert('Valuation created. Accept to go to home page');
+                    $(location).attr('href', getUrlHome());
+                })
+                .fail(function (jqXHR) {
+                    showError(jqXHR.responseJSON);
+                });
+        });
+
+    //Load valuations (if exist list valuations)
+    if ($('#list-valuations').length) {
+        $('#evaluated').text(getUrlParameter('user'));
+        getValuationsByEvaluated(getLocalToken(), getUrlParameter('user'))
+            .done(function (valuations) {
+                console.log(valuations);
+                var sumS = 0, sumB = 0;
+                $('#votesSeller').text(valuations.valuationsAsSeller.length);
+                $.each(valuations.valuationsAsSeller, function (key, valuation) {
+                    sumS += valuation.points;
+                    $('#asSeller').append(getHTMLValuation(valuation));
+                });
+                $('#avgSeller').text(valuations.valuationsAsSeller.length == 0 ? 0 : sumS / valuations.valuationsAsSeller.length);
+
+                $('#votesBuyer').text(valuations.valuationsAsBuyer.length);
+                $.each(valuations.valuationsAsBuyer, function (key, valuation) {
+                    sumB += valuation.points;
+                    $('#asBuyer').append(getHTMLValuation(valuation));
+                });
+                $('#avgBuyer').text(valuations.valuationsAsBuyer.length == 0 ? 0 : sumB / valuations.valuationsAsBuyer.length);
+            })
+            .fail(function (jqXHR) {
+                showError(jqXHR.responseJSON);
+                $('#formMessage').attr("disabled", true);
             });
     }
 

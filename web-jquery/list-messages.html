@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <link rel="stylesheet" type="text/css" href="resources/bootstrap.min.css">
+    <link rel="stylesheet" type="text/css" href="resources/fontawesome-free-5.0.13/web-fonts-with-css/css/fontawesome-all.css">
+    <link rel="stylesheet" type="text/css" href="css/main.css">
+
+    <script src="resources/jquery.min.js"></script>
+    <script src="resources/popper.min.js"></script>
+    <script src="resources/bootstrap.min.js"></script>
+    <script src="js/ajax.js"></script>
+    <script src="js/main.js" defer></script>
+
+    <title>App purchase currency exchange</title>
+</head>
+
+<body>
+    <div id="menu"></div>
+    <div id="list-messages" class="container py-5">
+        <div id="alert"></div>
+        <h2>List of messages</h2>
+        <div class="row py-2">
+            <div class="col-md-8 offset-md-2">
+                <div id="messages"></div>
+                <form class="form" role="form" id="formMessage">
+                    <input type="hidden" id="conversationId">
+                    <div class="form-group">
+                        <textarea class="form-control" rows="3" id="messageContent" maxlength="255" placeholder="Write a message..." required></textarea>
+                    </div>
+                    <button id="btnMessage" class="btn btn-success btn-lg float-right">Send</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

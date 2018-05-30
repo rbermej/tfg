@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 
 import uoc.tfg.raulberme.communication.dto.ConversationDTO;
 import uoc.tfg.raulberme.communication.dto.MessageDTO;
+import uoc.tfg.raulberme.communication.dto.MessagesListDTO;
 import uoc.tfg.raulberme.communication.dto.ValuationDTO;
 import uoc.tfg.raulberme.communication.dto.ValuationListsDTO;
 import uoc.tfg.raulberme.communication.entity.Conversation;
@@ -86,12 +87,11 @@ public class CommunicationServiceImpl implements CommunicationService {
 	public void sendMessage(final String tokenId, final MessageForm messageForm) {
 		userManagementProvider.comproveAuthorization(tokenId, RolUserType.REGISTERED_USER);
 		final String transmitter = userManagementProvider.retrieveUsernameByToken(tokenId);
-		final String receiver = messageForm.getReceiver();
-		if (transmitter.equals(receiver))
-			throw new UnauthorizedCommunicationException(ERROR_RECEIVER_CANT_BE_SAME_TRANSMITTER);
-		if (!userManagementProvider.existsUserByUsername(receiver))
-			throw new NotFoundCommunicationException(ERROR_RECIEVER_NOT_FOUND);
-		final Conversation conversation = getConversation(transmitter, receiver);
+		final Conversation conversation = conversationRepository.findById(messageForm.getConversationId())
+				.orElseThrow(() -> new NotFoundCommunicationException(ERROR_CONVERSATION_NOT_FOUND));
+		if (!(transmitter.equals(conversation.getUser1()) || transmitter.equals(conversation.getUser2())))
+			throw new UnauthorizedCommunicationException(ERROR_YOU_ARENT_PARTICIPANT);
+
 		final Message message = createMessage(transmitter, conversation, createText(messageForm.getText()));
 		messageRepository.save(message);
 	}
@@ -105,14 +105,17 @@ public class CommunicationServiceImpl implements CommunicationService {
 	}
 
 	@Override
-	public Collection<MessageDTO> listMessagesByConversation(final String tokenId, final Long conversationId) {
+	public MessagesListDTO getConversationWithMessagesByParticipants(final String tokenId, final String receiver) {
 		userManagementProvider.comproveAuthorization(tokenId, RolUserType.REGISTERED_USER);
-		final String user = userManagementProvider.retrieveUsernameByToken(tokenId);
-		final Conversation conversation = conversationRepository.findById(conversationId)
-				.orElseThrow(() -> new NotFoundCommunicationException(ERROR_CONVERSATION_NOT_FOUND));
-		if (!(user.equals(conversation.getUser1()) || user.equals(conversation.getUser2())))
-			throw new UnauthorizedCommunicationException(ERROR_YOU_ARENT_PARTICIPANT);
-		return conversation.getMessage().stream().map(this::convertToDTO).sorted().collect(Collectors.toList());
+		final String transmitter = userManagementProvider.retrieveUsernameByToken(tokenId);
+		if (transmitter.equals(receiver))
+			throw new UnauthorizedCommunicationException(ERROR_RECEIVER_CANT_BE_SAME_TRANSMITTER);
+		if (!userManagementProvider.existsUserByUsername(receiver))
+			throw new NotFoundCommunicationException(ERROR_RECIEVER_NOT_FOUND);
+		final Conversation conversation = getConversation(transmitter, receiver);
+		final Collection<MessageDTO> messages = conversation.getMessage().stream().map(this::convertToDTO).sorted()
+				.collect(Collectors.toList());
+		return createMessagesListDTO(conversation.getId(), messages);
 	}
 
 	private Conversation getConversation(final String user1, final String user2) {
@@ -202,12 +205,21 @@ public class CommunicationServiceImpl implements CommunicationService {
 		// @formatter:on
 	}
 
-	private ValuationListsDTO createValuationListsDTO(final List<ValuationDTO> valutionsAsSeller,
-			final List<ValuationDTO> valutionsAsBuyer) {
+	private ValuationListsDTO createValuationListsDTO(final List<ValuationDTO> valuationsAsSeller,
+			final List<ValuationDTO> valuationsAsBuyer) {
 		// @formatter:off
 		return ValuationListsDTO.builder()
-				.valutionsAsSeller(valutionsAsSeller)
-				.valutionsAsBuyer(valutionsAsBuyer)
+				.valuationsAsSeller(valuationsAsSeller)
+				.valuationsAsBuyer(valuationsAsBuyer)
+				.build();
+		// @formatter:on
+	}
+
+	private MessagesListDTO createMessagesListDTO(final Long conversationId, final Collection<MessageDTO> messages) {
+		// @formatter:off
+		return MessagesListDTO.builder()
+				.conversationId(conversationId)
+				.messages(messages)
 				.build();
 		// @formatter:on
 	}

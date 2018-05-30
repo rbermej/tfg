@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <link rel="stylesheet" type="text/css" href="resources/bootstrap.min.css">
+    <link rel="stylesheet" type="text/css" href="resources/fontawesome-free-5.0.13/web-fonts-with-css/css/fontawesome-all.css">
+    <link rel="stylesheet" type="text/css" href="css/main.css">
+
+    <script src="resources/jquery.min.js"></script>
+    <script src="resources/popper.min.js"></script>
+    <script src="resources/bootstrap.min.js"></script>
+    <script src="js/ajax.js"></script>
+    <script src="js/main.js" defer></script>
+
+    <title>App purchase currency exchange</title>
+</head>
+
+<body>
+    <div id="menu"></div>
+    <div id="list-valuations" class="container py-5">
+        <div id="alert"></div>
+        <h2 class="text-center">Valuations of <span id="evaluated"></span></h2>
+        <div class="row py-2 divide">
+            <div class="col-md-6">
+                <p>As seller
+                    <span class="float-right">Average points:
+                        <span id="avgSeller"></span> / 5 in
+                        <span id="votesSeller"></span> votes</span>
+                </p>
+                <div id="asSeller"></div>
+            </div>
+            <div class="col-md-6">
+                <p>As buyer
+                    <span class="float-right">Average points:
+                        <span id="avgBuyer"></span> / 5 in
+                        <span id="votesBuyer"></span> votes</span>
+                </p>
+                <div id="asBuyer"></div>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

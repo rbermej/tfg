@@ -2,7 +2,7 @@
     display: none;
 }
 
-td.actions{
+td.actions, .col-num{
     text-align: center;
 }
 
@@ -17,3 +17,17 @@ caption{
 i.fas.fa-ban{
     color: red;
 }
+
+textarea {
+    resize: none;
+}
+
+.date{
+    color: gray;
+    font-style: italic;
+    text-align: right;
+}
+
+.row.divide [class*='col']:not(:last-child) {
+    border-bottom-color: black;
+  }

@@ -13,16 +13,16 @@ import lombok.Data;
 @ApiModel(value = "ValuationDTO", description = "Complete data of a Rest Valuation")
 @Data
 @Builder
-public class ValuationListsDTO implements Serializable {
+public class MessagesListDTO implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 
-	@ApiModelProperty(value = "The valuation's list as seller")
+	@ApiModelProperty(value = "The conversation id")
 	@JsonProperty
-	private Collection<ValuationDTO> valuationsAsSeller;
+	private Long conversationId;
 
-	@ApiModelProperty(value = "The valuation's list as buyer")
+	@ApiModelProperty(value = "The conversation's messages list")
 	@JsonProperty
-	private Collection<ValuationDTO> valuationsAsBuyer;
+	private Collection<MessageDTO> messages;
 
 }

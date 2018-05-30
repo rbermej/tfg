@@ -69,7 +69,8 @@ public class PurchaseServiceImpl implements PurchaseService {
 		} else {
 			ads = adRepository.findByStatus(AdStatusType.ACTIVATED);
 		}
-		return ads.stream().map(this::convertToDTO).sorted().collect(Collectors.toList());
+		return ads.stream().filter(a -> userManagementProvider.existsUserByUsername(a.getSeller()))
+				.map(this::convertToDTO).sorted().collect(Collectors.toList());
 	}
 
 	@Override

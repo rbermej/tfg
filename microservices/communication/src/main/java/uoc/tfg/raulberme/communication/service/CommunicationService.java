@@ -3,7 +3,7 @@ package uoc.tfg.raulberme.communication.service;
 import java.util.Collection;
 
 import uoc.tfg.raulberme.communication.dto.ConversationDTO;
-import uoc.tfg.raulberme.communication.dto.MessageDTO;
+import uoc.tfg.raulberme.communication.dto.MessagesListDTO;
 import uoc.tfg.raulberme.communication.dto.ValuationListsDTO;
 import uoc.tfg.raulberme.communication.form.MessageForm;
 import uoc.tfg.raulberme.communication.form.ValuationForm;
@@ -18,6 +18,6 @@ public interface CommunicationService {
 
 	public Collection<ConversationDTO> listConversationsByParticipant(final String tokenId);
 
-	public Collection<MessageDTO> listMessagesByConversation(final String tokenId, final Long conversationId);
+	public MessagesListDTO getConversationWithMessagesByParticipants(final String tokenId, final String receiver);
 
 }

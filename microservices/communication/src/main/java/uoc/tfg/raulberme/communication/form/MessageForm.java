@@ -8,7 +8,7 @@ import lombok.Data;
 public class MessageForm {
 
 	@NotNull
-	private String receiver;
+	private Long conversationId;
 
 	@NotNull
 	private String text;

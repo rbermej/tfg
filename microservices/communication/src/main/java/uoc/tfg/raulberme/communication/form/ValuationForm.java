@@ -16,7 +16,7 @@ public class ValuationForm {
 	@NotNull
 	private UserRolOnAd rol;
 
-	@Min(1)
+	@Min(0)
 	@Max(5)
 	@NotNull
 	private Integer points;

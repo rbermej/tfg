@@ -18,7 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import uoc.tfg.raulberme.communication.dto.ConversationDTO;
-import uoc.tfg.raulberme.communication.dto.MessageDTO;
+import uoc.tfg.raulberme.communication.dto.MessagesListDTO;
 import uoc.tfg.raulberme.communication.dto.ValuationListsDTO;
 import uoc.tfg.raulberme.communication.form.MessageForm;
 import uoc.tfg.raulberme.communication.form.ValuationForm;
@@ -65,9 +65,9 @@ public class CommunicationAPI {
 
 	@ApiOperation(value = "", notes = "")
 	@GetMapping("messages")
-	public @ResponseBody Collection<MessageDTO> listMessagesByConversation(@RequestParam final String tokenId,
-			@RequestParam final Long conversationId) {
-		return service.listMessagesByConversation(tokenId, conversationId);
+	public @ResponseBody MessagesListDTO listMessagesByParticipants(@RequestParam final String tokenId,
+			@RequestParam final String receiver) {
+		return service.getConversationWithMessagesByParticipants(tokenId, receiver);
 	}
 
 }

@@ -8,4 +8,6 @@ public interface UserManagementProvider {
 
 	public String retrieveUsernameByToken(final String tokenId);
 
+	public boolean existsUserByUsername(final String username);
+
 }

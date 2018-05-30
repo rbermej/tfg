@@ -15,6 +15,7 @@ import uoc.tfg.raulberme.pruchase.provider.UserManagementProvider;
 @Component
 public class UserManagementLocalProvider implements UserManagementProvider {
 
+	private static final String SYSTEM_TOKEN = "system";
 	private static final String ERROR_USER_MANAGEMENT_NOT_AVAILABLE = "ERROR: User Management not available.";
 	private static final String ERROR_USER_CANT_BE_AUTHORIZATED = "ERROR: User can't be authorizated.";
 	private static final String RESOURCE_URL = "http://localhost:8081/user-management/";
@@ -59,6 +60,18 @@ public class UserManagementLocalProvider implements UserManagementProvider {
 		} catch (final Exception e) {
 			throw new NotFoundPurchaseException(ERROR_USER_MANAGEMENT_NOT_AVAILABLE);
 		}
+	}
+
+	@Override
+	public boolean existsUserByUsername(final String username) {
+		// @formatter:off
+		final String path = new StringBuilder(RESOURCE_URL)
+								.append("users/exists")
+								.append("?tokenId=").append(SYSTEM_TOKEN)
+								.append("&username=").append(username)
+								.toString();
+		// @formatter:on
+		return restTemplate.getForEntity(path, Boolean.class).getBody();
 	}
 
 }

@@ -39,7 +39,7 @@ public class ConversationDTO implements Serializable, Comparable<ConversationDTO
 
 	@Override
 	public int compareTo(final ConversationDTO other) {
-		return this.date.compareTo(other.getDate());
+		return other.getDate().compareTo(this.date);
 	}
 
 }
